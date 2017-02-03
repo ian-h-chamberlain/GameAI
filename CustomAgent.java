@@ -68,6 +68,13 @@ public boolean[] getAction()
 {
     // this Agent requires observation integrated in advance.
 
+	if(enemies[marioCenter[0]][marioCenter[1] + 1] != 0 || enemies[marioCenter[0]][marioCenter[1] + 2] != 0){
+		action[Mario.KEY_LEFT] = true;
+		action[Mario.KEY_RIGHT] = false;
+	}else{
+		action[Mario.KEY_LEFT] = false;
+		action[Mario.KEY_RIGHT] = true;
+	}
     if (getReceptiveFieldCellValue(marioCenter[0], marioCenter[1] + 2) != 0 ||
             getReceptiveFieldCellValue(marioCenter[0], marioCenter[1] + 1) != 0 ||
             DangerOfGap())
