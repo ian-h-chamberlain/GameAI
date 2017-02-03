@@ -90,7 +90,8 @@ public boolean[] getAction()
     }
     if(Math.random() < .9){
     	action[Mario.KEY_SPEED] = DangerOfGap();
-    }else{
+    }else if (marioMode == 2) {
+    	// if mario has fire flower, cycle to fire it
     	action[Mario.KEY_SPEED] = !DangerOfGap();
     }
     return action;
