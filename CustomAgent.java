@@ -88,7 +88,7 @@ public boolean[] getAction()
         trueJumpCounter = 0;
         action[Mario.KEY_JUMP] = false;
     }
-    if(Math.random() < .5){
+    if(Math.random() < .9){
     	action[Mario.KEY_SPEED] = DangerOfGap();
     }else{
     	action[Mario.KEY_SPEED] = !DangerOfGap();
