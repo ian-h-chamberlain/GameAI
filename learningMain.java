@@ -46,6 +46,8 @@ public final class learningMain
 		int outputNodes = 1;
 		int hiddenNodes = 10;
 		
+		double mutationChance = 0.01;
+		
 		Random rn = new Random();
 		
 		TreeMap<Double, ArrayList<NeuralNetwork>> networkFitnesses = new TreeMap<>();
@@ -96,11 +98,13 @@ public final class learningMain
 					inverseLink.weight = firstWeight * (1 - alpha) + secondWeight * alpha;
 
 					// TODO use std. deviation for this
-					double mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
-					childLink.weight += mutation;
+					if (rn.nextDouble() < mutationChance) {
+						double mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+						childLink.weight += mutation;
 
-					mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
-					inverseLink.weight += mutation;
+						mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+						inverseLink.weight += mutation;
+					}
 				}
 				
 				curGeneration.add(child);
@@ -129,8 +133,6 @@ public final class learningMain
 
 				networkFitnesses.get(fitness).add(curGeneration.get(j)); // TODO actually store network
 			}
-			
-			System.out.println("Next parents, from " + networkFitnesses.size() + " pool");
 			
 			Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 			
