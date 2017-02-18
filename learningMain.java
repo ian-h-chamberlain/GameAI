@@ -54,7 +54,7 @@ public final class learningMain
 		// randomly initialize parents
 		for (int i=0; i<numParents; i++) {
 			NeuralNetwork nn = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
-			// TODO randomize weights
+			nn.Randomize(-3, 3);
 			curGeneration.add(nn);
 		}
 
@@ -118,7 +118,7 @@ public final class learningMain
 				final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
 				float fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
 				*/
-				double[] inputs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+				double[] inputs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 				double fitness = curGeneration.get(j).getOutputs(inputs)[0];
 				
