@@ -131,7 +131,7 @@ public class NeuralNetwork {
 		public static class LILoc{
 			boolean onOutputs = false;
 			int i = 0;
-			int j = 0;
+			int j = -1;
 			boolean done = false;
 			@Override
 			public String toString(){
