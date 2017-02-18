@@ -28,6 +28,12 @@ public final class learningMain
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		
+		
+//		NeuralNetwork n =  NeuralNetwork.MakeFullyConnected(10,10,10);
+//		n.Randomize(0, 1);
+//		if(1==1){
+//			return;
+//		}
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(0);
 		cmdLineOptions.setLevelRandSeed(0);
