@@ -25,6 +25,10 @@ public class NeuralNetwork {
 
 		public double val;
 		
+		public Node(){
+			parents = new ArrayList<Link>();
+		}
+		
 		public double getVal(){
 			return val;
 		}
@@ -98,6 +102,7 @@ public class NeuralNetwork {
 		return new LinkIterator(this);
 	}
 	
+	
 	public static NeuralNetwork MakeFullyConnected(int input, int hidden, int output){
 		NeuralNetwork ret = new NeuralNetwork(input,hidden,output);
 		for(int i = 0; i < ret.hiddenNodes.size();i++){
@@ -113,6 +118,14 @@ public class NeuralNetwork {
 		return ret;
 	}
 	
+	public void Randomize(double min, double max){
+		LinkIterator itr = getIterator();
+		while(itr.hasNext()){
+			Link t = itr.next();
+			double val = Math.random() * (max-min) + min;
+			t.weight = val;
+		}
+	}
 	
 	public static class LinkIterator implements Iterator<Link>{
 		public static class LILoc{
@@ -120,6 +133,10 @@ public class NeuralNetwork {
 			int i = 0;
 			int j = 0;
 			boolean done = false;
+			@Override
+			public String toString(){
+				return "i: " + i + ", j: " + j + (onOutputs ?  " on outputs " : "") + (done ? " done " : "");
+			}
 			public LILoc next(NeuralNetwork n){
 				List<BasicNode> l = n.hiddenNodes;
 				LILoc ret = new LILoc(this);
@@ -127,6 +144,10 @@ public class NeuralNetwork {
 					l = n.outputNodes;
 				}
 				ret.j++;
+				System.out.println(this);
+				System.out.println(ret);
+				System.out.println(n.inputNodes.size()  + ":" + n.hiddenNodes.size() + ":" + l.size());
+				
 				List<Link> links = ((Node)l.get(ret.i)).parents;
 				if(ret.j >= links.size()){
 					ret.i++;
@@ -165,6 +186,7 @@ public class NeuralNetwork {
 		NeuralNetwork net;
 		
 		public LinkIterator(NeuralNetwork n){
+			location = new LILoc();
 			net = n;
 		}
 		
