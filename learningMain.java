@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import ch.idsia.agents.Agent;
+import ch.idsia.agents.controllers.NeuralNetwork.Link;
+import ch.idsia.agents.controllers.NeuralNetwork.LinkIterator;
 import ch.idsia.benchmark.mario.environments.Environment;
 import ch.idsia.benchmark.mario.environments.MarioEnvironment;
 import ch.idsia.benchmark.tasks.BasicTask;
@@ -34,19 +36,20 @@ public final class learningMain
 		int numParents = 50;
 		int numChildren = 50;
 		
+		int inputNodes = 10;
+		int outputNodes = 1;
+		int hiddenNodes = 10;
+		
 		Random rn = new Random();
 		
-		TreeMap<Float, ArrayList<Integer>> networkFitnesses = new TreeMap<>();
-		ArrayList<Integer> curGeneration = new ArrayList<>();
-		
-		HashMap<Integer, Float> fitnesses = new HashMap<>();
+		TreeMap<Double, ArrayList<NeuralNetwork>> networkFitnesses = new TreeMap<>();
+		ArrayList<NeuralNetwork> curGeneration = new ArrayList<>();
 
-		int id = 0;
 		// randomly initialize parents
 		for (int i=0; i<numParents; i++) {
-			curGeneration.add(id);
-			fitnesses.put(id, rn.nextFloat() * 100);
-			id++;
+			NeuralNetwork nn = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+			// TODO randomize weights
+			curGeneration.add(nn);
 		}
 
 		final BasicTask basicTask = new BasicTask(cmdLineOptions);
@@ -57,19 +60,44 @@ public final class learningMain
 			System.out.println("Generation " + i);
 			
 			// Generate children randomly from parent list
-			for (int j=0; j<numChildren; j++) {
+			for (int j=0; j<numChildren / 2; j++) {
 				int first = rn.nextInt(numParents);
 				int second = first;
 				while (second == first) {
 					second = rn.nextInt(numParents);
 				}
 				
-				// recombine second and first
-				curGeneration.add(id);
-				fitnesses.put(id, rn.nextFloat() * 100);
-				id++;
+				LinkIterator firstItr = curGeneration.get(first).getIterator();
+				LinkIterator secondItr = curGeneration.get(second).getIterator();
 				
-				// TODO apply random mutation to child
+				// recombine second and first
+				NeuralNetwork child = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+				LinkIterator childItr = child.getIterator();
+				NeuralNetwork inverseChild = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+				LinkIterator inverseItr = inverseChild.getIterator();
+				
+				// recombine all weights randomly
+				while (firstItr.hasNext() && secondItr.hasNext() && childItr.hasNext() && inverseItr.hasNext()) {
+					double alpha = rn.nextDouble();
+					
+					double firstWeight = firstItr.next().weight;
+					double secondWeight = secondItr.next().weight;
+					
+					Link childLink = childItr.next();
+					Link inverseLink = inverseItr.next();
+					
+					childLink.weight = firstWeight * alpha + secondWeight * (1 - alpha);
+					inverseLink.weight = firstWeight * (1 - alpha) + secondWeight * alpha;
+
+					// TODO use std. deviation for this
+					double mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+					childLink.weight += mutation;
+
+					mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+					inverseLink.weight += mutation;
+				}
+				
+				curGeneration.add(child);
 			}
 			
 			networkFitnesses.clear();
@@ -84,7 +112,9 @@ public final class learningMain
 				final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
 				float fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
 				*/
-				float fitness = fitnesses.get(curGeneration.get(j));
+				double[] inputs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+				double fitness = curGeneration.get(j).getOutputs(inputs)[0];
 				
 				if (!networkFitnesses.containsKey(fitness)) {
 					networkFitnesses.put(fitness, new ArrayList<>());
@@ -95,7 +125,7 @@ public final class learningMain
 			
 			System.out.println("Next parents, from " + networkFitnesses.size() + " pool");
 			
-			Iterator<Map.Entry<Float, ArrayList<Integer>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
+			Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 			
 			// Get the next generation parents with highest fitnesses
 			curGeneration.clear();
@@ -106,12 +136,12 @@ public final class learningMain
 					break;
 				}
 
-				Map.Entry<Float, ArrayList<Integer>> entry = itr.next();
+				Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
 				int k = 0;
 				while (k < entry.getValue().size() && curGeneration.size() < numParents) {
 					// System.out.print(entry.getValue().get(k) +":" + entry.getKey().toString() + ",");
 					curGeneration.add(entry.getValue().get(k));
-					System.out.print(entry.getValue().get(k) + ":" + entry.getKey() + ",");
+					System.out.print(entry.getKey() + ",");
 					k++;
 				}
 			}
