@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import ch.idsia.agents.Agent;
+import ch.idsia.agents.controllers.NeuralNetwork.LinkIterator;
 import ch.idsia.benchmark.mario.environments.Environment;
 import ch.idsia.benchmark.mario.environments.MarioEnvironment;
 import ch.idsia.benchmark.tasks.BasicTask;
@@ -27,11 +28,16 @@ public final class learningMain
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		
 		
-//		NeuralNetwork n =  NeuralNetwork.MakeFullyConnected(10,10,10);
-//		n.Randomize(0, 1);
-//		if(1==1){
-//			return;
-//		}
+		NeuralNetwork n =  NeuralNetwork.MakeFullyConnected(10,10,1);
+		n.Randomize(-3, 3);
+		
+		LinkIterator l = n.getIterator();
+		while(l.hasNext()){
+			System.out.println(l.next().weight);
+		}
+		if(1==1){
+			return;
+		}
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(0);
 		cmdLineOptions.setLevelRandSeed(0);
