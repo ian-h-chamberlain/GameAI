@@ -38,7 +38,7 @@ public final class learningMain
 		cmdLineOptions.setLevelDifficulty(0);
 		cmdLineOptions.setLevelRandSeed(0);
 		
-		int numGenerations = 1000;
+		int numGenerations = 50;
 		int numParents = 50;
 		int numChildren = 50;
 		
@@ -53,7 +53,7 @@ public final class learningMain
 
 		// randomly initialize parents
 		for (int i=0; i<numParents; i++) {
-			NeuralNetwork nn = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+			NeuralNetwork nn = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
 			nn.Randomize(-3, 3);
 			curGeneration.add(nn);
 		}
@@ -63,7 +63,7 @@ public final class learningMain
 		// start running the generations
 		for (int i=0; i<numGenerations; i++) {
 			
-			System.out.println("Generation " + i);
+			System.out.println("Generation " + i + ", " + curGeneration.size() + " members");
 			
 			// Generate children randomly from parent list
 			for (int j=0; j<numChildren / 2; j++) {
@@ -77,9 +77,9 @@ public final class learningMain
 				LinkIterator secondItr = curGeneration.get(second).getIterator();
 				
 				// recombine second and first
-				NeuralNetwork child = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+				NeuralNetwork child = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
 				LinkIterator childItr = child.getIterator();
-				NeuralNetwork inverseChild = new NeuralNetwork(inputNodes, hiddenNodes, outputNodes);
+				NeuralNetwork inverseChild = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
 				LinkIterator inverseItr = inverseChild.getIterator();
 				
 				// recombine all weights randomly
@@ -104,6 +104,7 @@ public final class learningMain
 				}
 				
 				curGeneration.add(child);
+				curGeneration.add(inverseChild);
 			}
 			
 			networkFitnesses.clear();
