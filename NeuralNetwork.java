@@ -54,6 +54,8 @@ public class NeuralNetwork {
 	public List<BasicNode> inputNodes;
 	public List<BasicNode> outputNodes;
 	
+	public int id;
+	public static int maxid = 0; 
 	
 	public static double sigmoid(double x){
 		return 1/(1+Math.pow(Math.E, -x));
@@ -72,6 +74,8 @@ public class NeuralNetwork {
 		for(int i = 0; i < output; i++){
 			outputNodes.add(new Node());
 		}
+		id = maxid;
+		maxid++;
 	}
 	
 	
