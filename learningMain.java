@@ -28,12 +28,7 @@ public final class learningMain
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		
-		
-//		NeuralNetwork n =  NeuralNetwork.MakeFullyConnected(10,10,10);
-//		n.Randomize(0, 1);
-//		if(1==1){
-//			return;
-//		}
+
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(0);
 		cmdLineOptions.setLevelRandSeed(0);
@@ -42,8 +37,13 @@ public final class learningMain
 		int numParents = 50;
 		int numChildren = 50;
 		
-		int inputNodes = 10;
-		int outputNodes = 1;
+		int inputX = 3;
+		int inputY = 3;
+		
+		LearningAgent.setInputFieldSize(inputX, inputY);
+		
+		int inputNodes = inputX * inputY;
+		int outputNodes = 5;
 		int hiddenNodes = 10;
 		
 		double mutationChance = 0.01;
@@ -115,18 +115,15 @@ public final class learningMain
 
 			for (int j=0; j<curGeneration.size(); j++) {
 				
-				// TODO set the current neural network
-				/*
+				// tell the learning agent to use this neural net
+				LearningAgent.useNeuralNetwork(curGeneration.get(j));
+				
 				basicTask.reset(cmdLineOptions);
 				basicTask.runOneEpisode();
 				
 				final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
-				float fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
-				*/
-				double[] inputs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+				double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
 
-				double fitness = curGeneration.get(j).getOutputs(inputs)[0];
-				
 				if (!networkFitnesses.containsKey(fitness)) {
 					networkFitnesses.put(fitness, new ArrayList<>());
 				}
