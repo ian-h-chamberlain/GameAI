@@ -99,7 +99,7 @@ public class NeuralNetwork {
 	
 	public String toString(){
 		String ret = "";
-		ret += hiddenNodes.size() + "~" + inputNodes.size() + "~" + outputNodes.size() + "~";
+		ret += inputNodes.size()+ "~" +hiddenNodes.size() + "~" + outputNodes.size() + "~";
 		LinkIterator l = getIterator();
 		while(l.hasNext()){
 			ret += Double.toHexString(l.next().weight);
@@ -147,6 +147,7 @@ public class NeuralNetwork {
 		int i = 0;
 		while(l.hasNext()){
 			l.next().weight = Double.valueOf(layer2[i]);
+			System.out.println(i);
 			i++;
 		}
 		return ret;
