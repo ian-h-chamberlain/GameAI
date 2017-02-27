@@ -30,18 +30,20 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 
 	@Override
 	public boolean[] getAction() {
-		double inputs[] = new double[inputFieldWidth * inputFieldHeight + 1];
+		double inputs[] = new double[2 * inputFieldWidth * inputFieldHeight + 1];
 		
 		int startX = marioCenter[0] - inputFieldWidth / 2;
 		int startY = marioCenter[1] - inputFieldHeight / 2;
 		
 		for (int i=0; i<inputFieldWidth; i++) {
 			for (int j=0; j<inputFieldHeight; j++) {
-				inputs[j * inputFieldHeight + i] = getReceptiveFieldCellValue(startX + i, startY + j);
+				inputs[j * inputFieldHeight + i] = levelScene[startX + i][startY + j];
+				inputs[j * inputFieldHeight + i + (inputFieldWidth * inputFieldHeight)] = enemies[startX + i][startY + j];
 			}
 		}
 		
-		inputs[inputs.length - 1] = new Random().nextDouble();
+		Random gen = new Random(0);
+		inputs[inputs.length - 1] = gen.nextDouble();
 		
 		double[] results = net.getOutputs(inputs);
 		
