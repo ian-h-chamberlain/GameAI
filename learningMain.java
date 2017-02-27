@@ -2,7 +2,6 @@ package ch.idsia.agents.controllers;
 
 import java.util.ArrayList;
 
-import javax.json;
 
 import java.util.HashMap;
 import java.util.Iterator;
