@@ -56,7 +56,7 @@ public final class learningMain
 	}
 	
 	public static void WriteNetwork(NeuralNetwork n,double fitness){
-		System.out.println("_____________________WRITING________________");
+		//System.out.println("_____________________WRITING________________");
 		String finalNetwork = n.toString();
 		String[] netparams = finalNetwork.split("~");
 		String filename = netparams[0] + "l" +netparams[1] + "l" + netparams[2]; 
@@ -71,7 +71,7 @@ public final class learningMain
 			//Files.write(file, lines, Charset.forName("UTF-8"));
 			Files.write(file,s,Charset.forName("UTF-8"));
 			PrintWriter writer = new PrintWriter(filename + "/" + Double.valueOf(fitness).toString(),"UTF-8");
-			System.out.println(finalNetwork);
+			//System.out.println(finalNetwork);
 			writer.write(finalNetwork);
 			writer.close();
 		} catch (FileNotFoundException e) {
