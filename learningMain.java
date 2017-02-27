@@ -111,10 +111,10 @@ public final class learningMain
 		cmdLineOptions.setLevelDifficulty(difficulty);
 		cmdLineOptions.setLevelRandSeed(seed);
 		
-		NeuralNetwork cur = ReadNetwork("19l10l6/3960.316650390625");
-		playSingleGame(cur,true,difficulty,seed);
-		System.exit(0);
-		int numGenerations = 200;
+		//NeuralNetwork cur = ReadNetwork("19l10l6/3960.316650390625");
+		//playSingleGame(cur,true,difficulty,seed);
+		//System.exit(0);
+		int numGenerations = 20;
 		int numParents = 20;
 		int numChildren = 20;
 		
