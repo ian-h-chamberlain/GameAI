@@ -126,8 +126,8 @@ public final class learningMain
 		//playSingleGame(cur,true,difficulty,seed);
 		//System.exit(0);
 		int numGenerations = 5;
-		int numParents = 20;
-		int numChildren = 20;
+		int numParents = 10;
+		int numChildren = 10;
 		
 		int inputX = 3;
 		int inputY = 3;
@@ -147,9 +147,9 @@ public final class learningMain
 		
 		ArrayList<NeuralNetwork> bestParents = new ArrayList<>();
 
+		String csvOut = "";
+
 		for (int m=0; m <= numParents; m++) {
-			
-			String csvOut = "";
 			
 			for (int i=0; i<numParents; i++) {
 				// set up the meta generation
@@ -243,23 +243,7 @@ public final class learningMain
 						networkFitnesses.put(fitness, new ArrayList<>());
 					}
 
-<<<<<<< HEAD
-				networkFitnesses.get(fitness).add(curGeneration.get(j)); // TODO actually store network
-			}
-			
-			Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
-			
-			// Get the next generation parents with highest fitnesses
-			curGeneration.clear();
-			String currentRow = "";
-			while (curGeneration.size() < numParents) {
-				if (!itr.hasNext()) {
-					// this probably shouldn't happen
-					System.err.println("Ran out of candidates!");
-					break;
-=======
 					networkFitnesses.get(fitness).add(curGeneration.get(j)); // TODO actually store network
->>>>>>> b840600cafad9f809e72452e252a11da6afb5e52
 				}
 				
 				Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
@@ -290,28 +274,28 @@ public final class learningMain
 				System.out.println("");
 				System.out.println(curGeneration.size() + " selected");
 				
+				itr = networkFitnesses.descendingMap().entrySet().iterator();
+				String currentRow = "";
+				
+				while(itr.hasNext()){
+					Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
+					for(int j = 0; j < entry.getValue().size(); j++){
+						currentRow += entry.getKey() + ",";
+					}
+				}
+				
+				csvOut += currentRow + "\n";
 			}
+
 			if (m < numParents) {
 				Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 				
 				bestParents.add(itr.next().getValue().get(0));
 				curGeneration.clear();
 			}
-<<<<<<< HEAD
-			itr = networkFitnesses.descendingMap().entrySet().iterator();
-			while(itr.hasNext()){
-				Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
-				for(int j = 0; j < entry.getValue().size(); j++){
-					currentRow += entry.getKey() + ",";
-				}
-			}
-			
-			csvOut += currentRow + "\n";
 			System.out.println("");
 			System.out.println(curGeneration.size() + " selected");
 			
-=======
->>>>>>> b840600cafad9f809e72452e252a11da6afb5e52
 		}
 		WriteCSV("data",csvOut);
 		
