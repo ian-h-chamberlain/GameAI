@@ -14,6 +14,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -104,8 +107,8 @@ public final class learningMain
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		
 		// initialize the level paramaters
-		cmdLineOptions.setLevelDifficulty(0);
-		cmdLineOptions.setLevelRandSeed(3);
+		cmdLineOptions.setLevelDifficulty(25);
+		cmdLineOptions.setLevelRandSeed(11);
 		
 		//NeuralNetwork cur = ReadNetwork("10l10l6/2980.9208984375");
 		//playSingleGame(cur,true,0,3);
@@ -119,11 +122,11 @@ public final class learningMain
 		
 		LearningAgent.setInputFieldSize(inputX, inputY);
 		
-		int inputNodes = inputX * inputY + 1;
+		int inputNodes = inputX * inputY * 2 + 1;
 		int outputNodes = 6;
 		int hiddenNodes = 10;
 		
-		double mutationChance = 0.01;
+		double mutationChance = 1.0;
 		
 		Random rn = new Random();
 		
@@ -161,9 +164,20 @@ public final class learningMain
 				NeuralNetwork inverseChild = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
 				LinkIterator inverseItr = inverseChild.getIterator();
 				
+				// first we need to combine sigma
+				double alpha = rn.nextDouble();
+				double firstSig = curGeneration.get(first).getSigma();
+				double secondSig = curGeneration.get(second).getSigma();
+				
+				child.setSigma(firstSig * alpha + secondSig * (1 - alpha));
+				inverseChild.setSigma(firstSig * (1 - alpha) + secondSig * alpha);
+				
+				child.setSigma(child.getSigma() + rn.nextGaussian() * child.getSigma());
+				inverseChild.setSigma(inverseChild.getSigma() + rn.nextGaussian() * inverseChild.getSigma());
+				
 				// recombine all weights randomly
 				while (firstItr.hasNext() && secondItr.hasNext() && childItr.hasNext() && inverseItr.hasNext()) {
-					double alpha = rn.nextDouble();
+					alpha = rn.nextDouble();
 					
 					double firstWeight = firstItr.next().weight;
 					double secondWeight = secondItr.next().weight;
@@ -174,12 +188,11 @@ public final class learningMain
 					childLink.weight = firstWeight * alpha + secondWeight * (1 - alpha);
 					inverseLink.weight = firstWeight * (1 - alpha) + secondWeight * alpha;
 
-					// TODO use std. deviation for this
 					if (rn.nextDouble() < mutationChance) {
-						double mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+						double mutation = rn.nextGaussian() * child.getSigma();
 						childLink.weight += mutation;
-
-						mutation = (rn.nextDouble() - 0.5) * 0.01 * (childLink.weight + inverseLink.weight);
+						
+						mutation = rn.nextGaussian() * inverseChild.getSigma();
 						inverseLink.weight += mutation;
 					}
 				}
@@ -194,16 +207,6 @@ public final class learningMain
 				
 				// tell the learning agent to use this neural net
 				LearningAgent.useNeuralNetwork(curGeneration.get(j));
-				
-				if (j == 0 && i == numGenerations - 1) {
-				/*
-					String finalNetwork = curGeneration.get(j).toString();
-					PrintWriter writer = new PrintWriter()*/
-					cmdLineOptions.setVisualization(true);
-				}
-				else {
-					cmdLineOptions.setVisualization(false);
-				}
 				
 				basicTask.reset(cmdLineOptions);
 				basicTask.runOneEpisode();
@@ -234,16 +237,23 @@ public final class learningMain
 				int k = 0;
 				while (k < entry.getValue().size() && curGeneration.size() < numParents) {
 					// System.out.print(entry.getValue().get(k) +":" + entry.getKey().toString() + ",");
+					Double sigma = entry.getValue().get(k).sigma;
+					sigma = BigDecimal.valueOf(sigma).setScale(3, RoundingMode.HALF_UP).doubleValue();
+					
 					curGeneration.add(entry.getValue().get(k));
-					System.out.print(entry.getKey() + ",");
+					System.out.print(entry.getValue().get(k).id + ",");
+					System.out.print(sigma.toString() + ",");
+					System.out.print(entry.getKey().intValue() + ";");
 					k++;
 				}
 			}
 			System.out.println("");
 			System.out.println(curGeneration.size() + " selected");
 			
-			// TODO: calculate std. devation and use it for evolving
 		}
+		
+		Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
+		playSingleGame(itr.next().getValue().get(0), true, cmdLineOptions.getLevelDifficulty(), cmdLineOptions.getLevelRandSeed());
 
 		System.exit(0);
 	}
