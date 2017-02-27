@@ -53,6 +53,10 @@ public final class learningMain
 		
 		task.reset(cmdLineOptions);
 		task.runOneEpisode();
+		
+		final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
+		double fitness = task.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
+		System.out.println("Fitness: " + fitness);
 	}
 	
 	public static void WriteNetwork(NeuralNetwork n,double fitness){
@@ -119,7 +123,7 @@ public final class learningMain
 		
 		LearningAgent.setInputFieldSize(inputX, inputY);
 		
-		int inputNodes = inputX * inputY * 2 + 1;
+		int inputNodes = inputX * inputY * 2 + 2;
 		int outputNodes = 6;
 		int hiddenNodes = 10;
 		

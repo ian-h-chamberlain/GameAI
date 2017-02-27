@@ -30,7 +30,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 
 	@Override
 	public boolean[] getAction() {
-		double inputs[] = new double[2 * inputFieldWidth * inputFieldHeight + 1];
+		double inputs[] = new double[2 * inputFieldWidth * inputFieldHeight + 2];
 		
 		int startX = marioCenter[0] - inputFieldWidth / 2;
 		int startY = marioCenter[1] - inputFieldHeight / 2;
@@ -44,6 +44,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 		
 		Random gen = new Random(0);
 		inputs[inputs.length - 1] = gen.nextDouble();
+		inputs[inputs.length - 2] = 1.0;
 		
 		double[] results = net.getOutputs(inputs);
 		
