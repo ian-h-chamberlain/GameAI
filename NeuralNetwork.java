@@ -7,6 +7,8 @@ import java.util.List;
 public class NeuralNetwork {
 	//Iterator code at bottom.
 	
+	double sigma = 0.707; // standard Gauss distribution
+	
 	public static class Link{
 		public BasicNode owner;
 		public double weight;
@@ -18,6 +20,14 @@ public class NeuralNetwork {
 	
 	public interface BasicNode{
 		public double getVal();
+	}
+	
+	public void setSigma(double s) {
+		sigma = s;
+	}
+	
+	public double getSigma() {
+		return sigma;
 	}
 	
 	public static class Node implements BasicNode{

@@ -26,6 +26,22 @@ import ch.idsia.tools.CmdLineOptions;
  */
 public final class learningMain
 {
+	public static void playSingleGame(NeuralNetwork nn, boolean vizualize, int difficulty, int levelSeed) {
+
+		LearningAgent.useNeuralNetwork(nn);
+		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
+		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
+		
+		cmdLineOptions.setVisualization(vizualize);
+		cmdLineOptions.setLevelDifficulty(difficulty);
+		cmdLineOptions.setLevelRandSeed(levelSeed);
+		
+		final BasicTask task = new BasicTask(cmdLineOptions);
+		
+		task.reset(cmdLineOptions);
+		task.runOneEpisode();
+	}
+	
 	public static void main(String[] args)
 	{
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
@@ -39,8 +55,8 @@ public final class learningMain
 		int numParents = 20;
 		int numChildren = 20;
 		
-		int inputX = 5;
-		int inputY = 5;
+		int inputX = 3;
+		int inputY = 3;
 		
 		LearningAgent.setInputFieldSize(inputX, inputY);
 		
