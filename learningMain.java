@@ -105,16 +105,16 @@ public final class learningMain
 	{
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
-		
+		int difficulty = 25;
+		int seed = 11;
 		// initialize the level paramaters
-		cmdLineOptions.setLevelDifficulty(0);
-		cmdLineOptions.setLevelRandSeed(11);
+		cmdLineOptions.setLevelDifficulty(difficulty);
+		cmdLineOptions.setLevelRandSeed(seed);
 		
-		//NeuralNetwork cur = ReadNetwork("10l10l6/2980.9208984375");
-		//playSingleGame(cur,true,0,3);
-		//System.exit(0);
-
-		int numGenerations = 100;
+		NeuralNetwork cur = ReadNetwork("19l10l6/3579.7958984375");
+		playSingleGame(cur,true,difficulty,seed);
+		System.exit(0);
+		int numGenerations = 200;
 		int numParents = 20;
 		int numChildren = 20;
 		
