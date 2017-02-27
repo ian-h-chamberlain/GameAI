@@ -43,7 +43,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 			}
 		}
 		
-		inputs[inputs.length - 1] = 1.0; // gen.nextDouble();
+		inputs[inputs.length - 1] = gen.nextDouble();
 		inputs[inputs.length - 2] = 1.0;
 		
 		double[] results = net.getOutputs(inputs);
