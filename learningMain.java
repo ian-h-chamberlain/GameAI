@@ -1,5 +1,16 @@
 package ch.idsia.agents.controllers;
 
+import java.awt.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
@@ -41,6 +52,52 @@ public final class learningMain
 		task.runOneEpisode();
 	}
 	
+	public static void WriteNetwork(NeuralNetwork n,double fitness){
+		System.out.println("_____________________WRITING________________");
+		String finalNetwork = n.toString();
+		String[] netparams = finalNetwork.split("~");
+		String filename = netparams[0] + "l" +netparams[1] + "l" + netparams[2]; 
+		try {
+			File dir = new File(filename);
+			if(!dir.exists()){
+				dir.mkdirs();
+			}
+			ArrayList<String> s = new ArrayList<String>();
+			s.add(finalNetwork);
+			Path file = Paths.get("the-file-name.txt");
+			//Files.write(file, lines, Charset.forName("UTF-8"));
+			Files.write(file,s,Charset.forName("UTF-8"));
+			PrintWriter writer = new PrintWriter(filename + "/" + Double.valueOf(fitness).toString(),"UTF-8");
+			System.out.println(finalNetwork);
+			writer.write(finalNetwork);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	//}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static NeuralNetwork ReadNetwork(String dir){
+		String ret = "";
+		try {
+			File f = new File(dir);
+			FileReader read = new FileReader(f);
+			char[] exp = new char[(int) f.length()];
+			read.read(exp);
+			ret = new String(exp);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return NeuralNetwork.Parse(ret);
+	}
 	public static void main(String[] args)
 	{
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
@@ -50,7 +107,10 @@ public final class learningMain
 		cmdLineOptions.setLevelDifficulty(0);
 		cmdLineOptions.setLevelRandSeed(3);
 		
-		int numGenerations = 100;
+		//NeuralNetwork cur = ReadNetwork("10l10l6/2980.9208984375");
+		//playSingleGame(cur,true,0,3);
+		//System.exit(0);
+		int numGenerations = 2;
 		int numParents = 20;
 		int numChildren = 20;
 		
@@ -136,6 +196,9 @@ public final class learningMain
 				LearningAgent.useNeuralNetwork(curGeneration.get(j));
 				
 				if (j == 0 && i == numGenerations - 1) {
+				/*
+					String finalNetwork = curGeneration.get(j).toString();
+					PrintWriter writer = new PrintWriter()*/
 					cmdLineOptions.setVisualization(true);
 				}
 				else {
@@ -147,7 +210,8 @@ public final class learningMain
 				
 				final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
 				double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
-
+				
+				WriteNetwork(curGeneration.get(j),fitness);
 				if (!networkFitnesses.containsKey(fitness)) {
 					networkFitnesses.put(fitness, new ArrayList<>());
 				}

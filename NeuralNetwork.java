@@ -99,7 +99,7 @@ public class NeuralNetwork {
 	
 	public String toString(){
 		String ret = "";
-		ret += hiddenNodes + "|" + inputNodes + "|" + outputNodes + "|";
+		ret += hiddenNodes.size() + "~" + inputNodes.size() + "~" + outputNodes.size() + "~";
 		LinkIterator l = getIterator();
 		while(l.hasNext()){
 			ret += Double.toHexString(l.next().weight);
@@ -140,7 +140,7 @@ public class NeuralNetwork {
 	
 
 	public static  NeuralNetwork Parse(String s){
-		String[] layer1 = s.split("|");
+		String[] layer1 = s.split("~");
 		NeuralNetwork ret = MakeFullyConnected(Integer.parseInt(layer1[0]),Integer.parseInt(layer1[1]),Integer.parseInt(layer1[2]));
 		String[] layer2 = layer1[3].split(",");
 		LinkIterator l = ret.getIterator();
