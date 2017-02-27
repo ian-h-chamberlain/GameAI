@@ -32,6 +32,7 @@ import ch.idsia.benchmark.mario.environments.MarioEnvironment;
 import ch.idsia.benchmark.tasks.BasicTask;
 import ch.idsia.benchmark.tasks.MarioCustomSystemOfValues;
 import ch.idsia.tools.CmdLineOptions;
+import java.util.Calendar;
 
 /**
  * Created by IntelliJ IDEA. User: Sergey Karakovskiy, sergey at idsia dot ch Date: Mar 17, 2010 Time: 8:28:00 AM
@@ -39,6 +40,19 @@ import ch.idsia.tools.CmdLineOptions;
  */
 public final class learningMain
 {
+	public static void WriteCSV(String filename, String contents){
+		try {
+			Calendar.getInstance();
+			PrintWriter writer = new PrintWriter(filename + Calendar.getInstance().getTimeInMillis() + ".csv","UTF-8");
+			writer.write(contents);
+			writer.close();
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
 	public static void playSingleGame(NeuralNetwork nn, boolean vizualize, int difficulty, int levelSeed) {
 
 		LearningAgent.useNeuralNetwork(nn);
@@ -80,9 +94,6 @@ public final class learningMain
 	//}
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -105,16 +116,16 @@ public final class learningMain
 	{
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
-		int difficulty = 25;
+		int difficulty = 0;
 		int seed = 11;
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(difficulty);
 		cmdLineOptions.setLevelRandSeed(seed);
 		
-		//NeuralNetwork cur = ReadNetwork("19l10l6/3960.316650390625");
+		//NeuralNetwork cur = ReadNetwork("20l10l6/119.4000015258789");
 		//playSingleGame(cur,true,difficulty,seed);
 		//System.exit(0);
-		int numGenerations = 20;
+		int numGenerations = 5;
 		int numParents = 20;
 		int numChildren = 20;
 		
@@ -142,7 +153,7 @@ public final class learningMain
 		}
 
 		final BasicTask basicTask = new BasicTask(cmdLineOptions);
-
+		String csvOut = "";
 		// start running the generations
 		for (int i=0; i<numGenerations; i++) {
 			
@@ -227,6 +238,7 @@ public final class learningMain
 			
 			// Get the next generation parents with highest fitnesses
 			curGeneration.clear();
+			String currentRow = "";
 			while (curGeneration.size() < numParents) {
 				if (!itr.hasNext()) {
 					// this probably shouldn't happen
@@ -248,10 +260,20 @@ public final class learningMain
 					k++;
 				}
 			}
+			itr = networkFitnesses.descendingMap().entrySet().iterator();
+			while(itr.hasNext()){
+				Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
+				for(int j = 0; j < entry.getValue().size(); j++){
+					currentRow += entry.getKey() + ",";
+				}
+			}
+			
+			csvOut += currentRow + "\n";
 			System.out.println("");
 			System.out.println(curGeneration.size() + " selected");
 			
 		}
+		WriteCSV("data",csvOut);
 		
 		Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 		playSingleGame(itr.next().getValue().get(0), true, cmdLineOptions.getLevelDifficulty(), cmdLineOptions.getLevelRandSeed());
