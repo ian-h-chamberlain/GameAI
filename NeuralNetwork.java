@@ -148,11 +148,7 @@ public class NeuralNetwork {
 				if(ret.onOutputs){
 					l = n.outputNodes;
 				}
-				ret.j++;/*
-				System.out.println(this);
-				System.out.println(ret);
-				System.out.println(n.inputNodes.size()  + ":" + n.hiddenNodes.size() + ":" + l.size());
-				*/
+				ret.j++;
 				List<Link> links = ((Node)l.get(ret.i)).parents;
 				if(ret.j >= links.size()){
 					ret.i++;
