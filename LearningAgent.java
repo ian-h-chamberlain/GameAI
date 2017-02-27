@@ -13,6 +13,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 	static int inputFieldHeight = 3;
 	
 	int trueJumpCounter = 0;
+	Random gen;
 
 	public LearningAgent() {
 		super("LearningAgent");
@@ -42,8 +43,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 			}
 		}
 		
-		Random gen = new Random(0);
-		inputs[inputs.length - 1] = gen.nextDouble();
+		inputs[inputs.length - 1] = 1.0; // gen.nextDouble();
 		inputs[inputs.length - 2] = 1.0;
 		
 		double[] results = net.getOutputs(inputs);
@@ -72,6 +72,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent {
 
 	@Override
 	public void reset() {
+		gen = new Random(0);
 		action = new boolean[Environment.numberOfButtons];
 		trueJumpCounter = 0;
 	}
