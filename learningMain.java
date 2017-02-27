@@ -67,11 +67,7 @@ public final class learningMain
 			}
 			ArrayList<String> s = new ArrayList<String>();
 			s.add(finalNetwork);
-			Path file = Paths.get("the-file-name.txt");
-			//Files.write(file, lines, Charset.forName("UTF-8"));
-			Files.write(file,s,Charset.forName("UTF-8"));
 			PrintWriter writer = new PrintWriter(filename + "/" + Double.valueOf(fitness).toString(),"UTF-8");
-			//System.out.println(finalNetwork);
 			writer.write(finalNetwork);
 			writer.close();
 		} catch (FileNotFoundException e) {
