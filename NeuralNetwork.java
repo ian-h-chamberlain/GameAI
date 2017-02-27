@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+
 public class NeuralNetwork {
 	//Iterator code at bottom.
 	
@@ -50,6 +51,12 @@ public class NeuralNetwork {
 		}
 	}
 	
+	public static class compressedNN{
+		public double[] weights;
+		public int input;
+		public int hidden;
+		public int output;
+	}
 	
 	public List<BasicNode> hiddenNodes;
 	public List<BasicNode> inputNodes;
@@ -80,6 +87,20 @@ public class NeuralNetwork {
 	}
 	
 	
+	public String toString(){
+		String ret = "";
+		ret += hiddenNodes + "|" + inputNodes + "|" + outputNodes + "|";
+		LinkIterator l = getIterator();
+		while(l.hasNext()){
+			ret += Double.toHexString(l.next().weight);
+			if(l.hasNext()){
+				ret += ",";
+			}
+		}
+		return ret;
+	}
+	
+	
 	void runInputs(double[] inputs){
 		if(inputs.length != inputNodes.size()){
 			throw new RuntimeException("Error inputs and input nodes do not match.");
@@ -107,6 +128,19 @@ public class NeuralNetwork {
 		return new LinkIterator(this);
 	}
 	
+
+	public static  NeuralNetwork Parse(String s){
+		String[] layer1 = s.split("|");
+		NeuralNetwork ret = MakeFullyConnected(Integer.parseInt(layer1[0]),Integer.parseInt(layer1[1]),Integer.parseInt(layer1[2]));
+		String[] layer2 = layer1[3].split(",");
+		LinkIterator l = ret.getIterator();
+		int i = 0;
+		while(l.hasNext()){
+			l.next().weight = Double.valueOf(layer2[i]);
+			i++;
+		}
+		return ret;
+	}
 	
 	public static NeuralNetwork MakeFullyConnected(int input, int hidden, int output){
 		NeuralNetwork ret = new NeuralNetwork(input,hidden,output);
