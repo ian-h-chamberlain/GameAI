@@ -1,6 +1,9 @@
 package ch.idsia.agents.controllers;
 
 import java.util.ArrayList;
+
+import javax.json;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,22 +31,21 @@ public final class learningMain
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		
-
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(0);
-		cmdLineOptions.setLevelRandSeed(0);
+		cmdLineOptions.setLevelRandSeed(3);
 		
-		int numGenerations = 50;
-		int numParents = 50;
-		int numChildren = 50;
+		int numGenerations = 100;
+		int numParents = 20;
+		int numChildren = 20;
 		
-		int inputX = 3;
-		int inputY = 3;
+		int inputX = 5;
+		int inputY = 5;
 		
 		LearningAgent.setInputFieldSize(inputX, inputY);
 		
-		int inputNodes = inputX * inputY;
-		int outputNodes = 5;
+		int inputNodes = inputX * inputY + 1;
+		int outputNodes = 6;
 		int hiddenNodes = 10;
 		
 		double mutationChance = 0.01;
@@ -117,6 +119,13 @@ public final class learningMain
 				
 				// tell the learning agent to use this neural net
 				LearningAgent.useNeuralNetwork(curGeneration.get(j));
+				
+				if (j == 0 && i == numGenerations - 1) {
+					cmdLineOptions.setVisualization(true);
+				}
+				else {
+					cmdLineOptions.setVisualization(false);
+				}
 				
 				basicTask.reset(cmdLineOptions);
 				basicTask.runOneEpisode();
