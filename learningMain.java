@@ -114,7 +114,8 @@ public final class learningMain
 		//NeuralNetwork cur = ReadNetwork("19l10l6/3960.316650390625");
 		//playSingleGame(cur,true,difficulty,seed);
 		//System.exit(0);
-		int numGenerations = 20;
+
+		int numGenerations = 50;
 		int numParents = 20;
 		int numChildren = 20;
 		
@@ -133,124 +134,141 @@ public final class learningMain
 		
 		TreeMap<Double, ArrayList<NeuralNetwork>> networkFitnesses = new TreeMap<>();
 		ArrayList<NeuralNetwork> curGeneration = new ArrayList<>();
+		
+		ArrayList<NeuralNetwork> bestParents = new ArrayList<>();
 
-		// randomly initialize parents
-		for (int i=0; i<numParents; i++) {
-			NeuralNetwork nn = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
-			nn.Randomize(-3, 3);
-			curGeneration.add(nn);
-		}
-
-		final BasicTask basicTask = new BasicTask(cmdLineOptions);
-
-		// start running the generations
-		for (int i=0; i<numGenerations; i++) {
+		for (int m=0; m <= numParents; m++) {
 			
-			System.out.println("Generation " + i + ", " + curGeneration.size() + " members");
-			
-			// Generate children randomly from parent list
-			for (int j=0; j<numChildren / 2; j++) {
-				int first = rn.nextInt(numParents);
-				int second = first;
-				while (second == first) {
-					second = rn.nextInt(numParents);
+			for (int i=0; i<numParents; i++) {
+				// set up the meta generation
+				if (m == numParents) {
+					curGeneration.add(bestParents.get(i));
+				}
+				else {
+					// randomly initialize parents
+					NeuralNetwork nn = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
+					nn.Randomize(-3, 3);
+					curGeneration.add(nn);
+				}
+			}
+
+			final BasicTask basicTask = new BasicTask(cmdLineOptions);
+
+			// start running the generations
+			for (int i=0; i<numGenerations; i++) {
+				
+				System.out.println("Generation " + i + ", " + curGeneration.size() + " members");
+				
+				// Generate children randomly from parent list
+				for (int j=0; j<numChildren / 2; j++) {
+					int first = rn.nextInt(numParents);
+					int second = first;
+					while (second == first) {
+						second = rn.nextInt(numParents);
+					}
+					
+					LinkIterator firstItr = curGeneration.get(first).getIterator();
+					LinkIterator secondItr = curGeneration.get(second).getIterator();
+					
+					// recombine second and first
+					NeuralNetwork child = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
+					LinkIterator childItr = child.getIterator();
+					NeuralNetwork inverseChild = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
+					LinkIterator inverseItr = inverseChild.getIterator();
+					
+					// first we need to combine sigma
+					double alpha = rn.nextDouble();
+					double firstSig = curGeneration.get(first).getSigma();
+					double secondSig = curGeneration.get(second).getSigma();
+					
+					child.setSigma(firstSig * alpha + secondSig * (1 - alpha));
+					inverseChild.setSigma(firstSig * (1 - alpha) + secondSig * alpha);
+					
+					child.setSigma(child.getSigma() + rn.nextGaussian() * child.getSigma());
+					inverseChild.setSigma(inverseChild.getSigma() + rn.nextGaussian() * inverseChild.getSigma());
+					
+					// recombine all weights randomly
+					while (firstItr.hasNext() && secondItr.hasNext() && childItr.hasNext() && inverseItr.hasNext()) {
+						alpha = rn.nextDouble();
+						
+						double firstWeight = firstItr.next().weight;
+						double secondWeight = secondItr.next().weight;
+						
+						Link childLink = childItr.next();
+						Link inverseLink = inverseItr.next();
+						
+						childLink.weight = firstWeight * alpha + secondWeight * (1 - alpha);
+						inverseLink.weight = firstWeight * (1 - alpha) + secondWeight * alpha;
+
+						if (rn.nextDouble() < mutationChance) {
+							double mutation = rn.nextGaussian() * child.getSigma();
+							childLink.weight += mutation;
+							
+							mutation = rn.nextGaussian() * inverseChild.getSigma();
+							inverseLink.weight += mutation;
+						}
+					}
+					
+					curGeneration.add(child);
+					curGeneration.add(inverseChild);
 				}
 				
-				LinkIterator firstItr = curGeneration.get(first).getIterator();
-				LinkIterator secondItr = curGeneration.get(second).getIterator();
-				
-				// recombine second and first
-				NeuralNetwork child = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
-				LinkIterator childItr = child.getIterator();
-				NeuralNetwork inverseChild = NeuralNetwork.MakeFullyConnected(inputNodes, hiddenNodes, outputNodes);
-				LinkIterator inverseItr = inverseChild.getIterator();
-				
-				// first we need to combine sigma
-				double alpha = rn.nextDouble();
-				double firstSig = curGeneration.get(first).getSigma();
-				double secondSig = curGeneration.get(second).getSigma();
-				
-				child.setSigma(firstSig * alpha + secondSig * (1 - alpha));
-				inverseChild.setSigma(firstSig * (1 - alpha) + secondSig * alpha);
-				
-				child.setSigma(child.getSigma() + rn.nextGaussian() * child.getSigma());
-				inverseChild.setSigma(inverseChild.getSigma() + rn.nextGaussian() * inverseChild.getSigma());
-				
-				// recombine all weights randomly
-				while (firstItr.hasNext() && secondItr.hasNext() && childItr.hasNext() && inverseItr.hasNext()) {
-					alpha = rn.nextDouble();
-					
-					double firstWeight = firstItr.next().weight;
-					double secondWeight = secondItr.next().weight;
-					
-					Link childLink = childItr.next();
-					Link inverseLink = inverseItr.next();
-					
-					childLink.weight = firstWeight * alpha + secondWeight * (1 - alpha);
-					inverseLink.weight = firstWeight * (1 - alpha) + secondWeight * alpha;
+				networkFitnesses.clear();
 
-					if (rn.nextDouble() < mutationChance) {
-						double mutation = rn.nextGaussian() * child.getSigma();
-						childLink.weight += mutation;
+				for (int j=0; j<curGeneration.size(); j++) {
+					
+					// tell the learning agent to use this neural net
+					LearningAgent.useNeuralNetwork(curGeneration.get(j));
+					
+					basicTask.reset(cmdLineOptions);
+					basicTask.runOneEpisode();
+					
+					final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
+					double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
+					
+					WriteNetwork(curGeneration.get(j),fitness);
+					if (!networkFitnesses.containsKey(fitness)) {
+						networkFitnesses.put(fitness, new ArrayList<>());
+					}
+
+					networkFitnesses.get(fitness).add(curGeneration.get(j)); // TODO actually store network
+				}
+				
+				Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
+				
+				// Get the next generation parents with highest fitnesses
+				curGeneration.clear();
+				while (curGeneration.size() < numParents) {
+					if (!itr.hasNext()) {
+						// this probably shouldn't happen
+						System.err.println("Ran out of candidates!");
+						break;
+					}
+
+					Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
+					int k = 0;
+					while (k < entry.getValue().size() && curGeneration.size() < numParents) {
+						// System.out.print(entry.getValue().get(k) +":" + entry.getKey().toString() + ",");
+						Double sigma = entry.getValue().get(k).sigma;
+						sigma = BigDecimal.valueOf(sigma).setScale(3, RoundingMode.HALF_UP).doubleValue();
 						
-						mutation = rn.nextGaussian() * inverseChild.getSigma();
-						inverseLink.weight += mutation;
+						curGeneration.add(entry.getValue().get(k));
+						System.out.print(entry.getValue().get(k).id + ",");
+						System.out.print(sigma.toString() + ",");
+						System.out.print(entry.getKey().intValue() + ";");
+						k++;
 					}
 				}
+				System.out.println("");
+				System.out.println(curGeneration.size() + " selected");
 				
-				curGeneration.add(child);
-				curGeneration.add(inverseChild);
 			}
-			
-			networkFitnesses.clear();
-
-			for (int j=0; j<curGeneration.size(); j++) {
+			if (m < numParents) {
+				Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 				
-				// tell the learning agent to use this neural net
-				LearningAgent.useNeuralNetwork(curGeneration.get(j));
-				
-				basicTask.reset(cmdLineOptions);
-				basicTask.runOneEpisode();
-				
-				final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
-				double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
-				
-				WriteNetwork(curGeneration.get(j),fitness);
-				if (!networkFitnesses.containsKey(fitness)) {
-					networkFitnesses.put(fitness, new ArrayList<>());
-				}
-
-				networkFitnesses.get(fitness).add(curGeneration.get(j)); // TODO actually store network
+				bestParents.add(itr.next().getValue().get(0));
+				curGeneration.clear();
 			}
-			
-			Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
-			
-			// Get the next generation parents with highest fitnesses
-			curGeneration.clear();
-			while (curGeneration.size() < numParents) {
-				if (!itr.hasNext()) {
-					// this probably shouldn't happen
-					System.err.println("Ran out of candidates!");
-					break;
-				}
-
-				Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
-				int k = 0;
-				while (k < entry.getValue().size() && curGeneration.size() < numParents) {
-					// System.out.print(entry.getValue().get(k) +":" + entry.getKey().toString() + ",");
-					Double sigma = entry.getValue().get(k).sigma;
-					sigma = BigDecimal.valueOf(sigma).setScale(3, RoundingMode.HALF_UP).doubleValue();
-					
-					curGeneration.add(entry.getValue().get(k));
-					System.out.print(entry.getValue().get(k).id + ",");
-					System.out.print(sigma.toString() + ",");
-					System.out.print(entry.getKey().intValue() + ";");
-					k++;
-				}
-			}
-			System.out.println("");
-			System.out.println(curGeneration.size() + " selected");
-			
 		}
 		
 		Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
