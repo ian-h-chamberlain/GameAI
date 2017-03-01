@@ -147,7 +147,7 @@ public class NeuralNetwork {
 		int i = 0;
 		while(l.hasNext()){
 			l.next().weight = Double.valueOf(layer2[i]);
-			System.out.println(i);
+			// System.out.println(i);
 			i++;
 		}
 		return ret;

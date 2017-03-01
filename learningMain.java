@@ -1,34 +1,23 @@
 package ch.idsia.agents.controllers;
 
-import java.awt.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 
-import ch.idsia.agents.Agent;
 import ch.idsia.agents.controllers.NeuralNetwork.Link;
 import ch.idsia.agents.controllers.NeuralNetwork.LinkIterator;
-import ch.idsia.benchmark.mario.environments.Environment;
-import ch.idsia.benchmark.mario.environments.MarioEnvironment;
 import ch.idsia.benchmark.tasks.BasicTask;
 import ch.idsia.benchmark.tasks.MarioCustomSystemOfValues;
 import ch.idsia.tools.CmdLineOptions;
@@ -105,6 +94,7 @@ public final class learningMain
 			char[] exp = new char[(int) f.length()];
 			read.read(exp);
 			ret = new String(exp);
+			read.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -117,14 +107,11 @@ public final class learningMain
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.LearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 		int difficulty = 0;
-		int seed = 11;
+		int seed = 0;
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(difficulty);
 		cmdLineOptions.setLevelRandSeed(seed);
 		
-		//NeuralNetwork cur = ReadNetwork("20l10l6/119.4000015258789");
-		//playSingleGame(cur,true,difficulty,seed);
-		//System.exit(0);
 		int numGenerations = 5;
 		int numParents = 10;
 		int numChildren = 10;
@@ -133,6 +120,15 @@ public final class learningMain
 		int inputY = 3;
 		
 		LearningAgent.setInputFieldSize(inputX, inputY);
+
+		/*
+		for (int i=0; i<10; i++) {
+			NeuralNetwork cur = ReadNetwork("20l10l6/1566.9957275390625");
+			playSingleGame(cur,true,difficulty,0);
+		}
+		System.exit(0);
+		*/
+
 		
 		int inputNodes = inputX * inputY * 2 + 2;
 		int outputNodes = 6;
@@ -163,7 +159,7 @@ public final class learningMain
 					curGeneration.add(nn);
 				}
 			}
-
+			
 			final BasicTask basicTask = new BasicTask(cmdLineOptions);
 
 			// start running the generations
@@ -173,6 +169,7 @@ public final class learningMain
 				
 				// Generate children randomly from parent list
 				for (int j=0; j<numChildren / 2; j++) {
+					
 					int first = rn.nextInt(numParents);
 					int second = first;
 					while (second == first) {
@@ -232,6 +229,8 @@ public final class learningMain
 					// tell the learning agent to use this neural net
 					LearningAgent.useNeuralNetwork(curGeneration.get(j));
 					
+					// cmdLineOptions.setLevelRandSeed((j + rn.nextInt()) % 10);
+					
 					basicTask.reset(cmdLineOptions);
 					basicTask.runOneEpisode();
 					
@@ -248,41 +247,60 @@ public final class learningMain
 				
 				Iterator<Map.Entry<Double, ArrayList<NeuralNetwork>>> itr = networkFitnesses.descendingMap().entrySet().iterator();
 				
-				// Get the next generation parents with highest fitnesses
-				curGeneration.clear();
-				while (curGeneration.size() < numParents) {
-					if (!itr.hasNext()) {
-						// this probably shouldn't happen
-						System.err.println("Ran out of candidates!");
-						break;
-					}
+				NeuralNetwork[] nextCandidates = new NeuralNetwork[numParents + numChildren];
 
+				double[] candidateFitness = new double[numParents + numChildren];
+				double[] choice_weights = new double[numParents + numChildren];
+				
+				// collect the fitness of candidates and weights
+				String currentRow = "";
+				int j = 0;
+				double total_fitness = 0.0f;
+				while (itr.hasNext() && j < numParents + numChildren) {
 					Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
-					int k = 0;
-					while (k < entry.getValue().size() && curGeneration.size() < numParents) {
-						// System.out.print(entry.getValue().get(k) +":" + entry.getKey().toString() + ",");
-						Double sigma = entry.getValue().get(k).sigma;
-						sigma = BigDecimal.valueOf(sigma).setScale(3, RoundingMode.HALF_UP).doubleValue();
-						
-						curGeneration.add(entry.getValue().get(k));
-						System.out.print(entry.getValue().get(k).id + ",");
-						System.out.print(sigma.toString() + ",");
-						System.out.print(entry.getKey().intValue() + ";");
-						k++;
+					for (int k=0; k < entry.getValue().size() && j < numParents + numChildren; k++) {
+						nextCandidates[j] = entry.getValue().get(k);
+						candidateFitness[j] = entry.getKey();
+						total_fitness += entry.getKey();
+						currentRow += entry.getKey() + ",";
+						j++;
 					}
 				}
+				
+				// now sum all the previous weights so we get a useful array
+				for (j=0; j < numParents + numChildren; j++) {
+					choice_weights[j] = candidateFitness[j] / total_fitness;
+					for (int k=0; k<j; k++) {
+						choice_weights[j] += candidateFitness[k] / total_fitness;
+					}
+				}
+				
+				// Get the next generation parents with weighting based on fitness
+				curGeneration.clear();
+				while (curGeneration.size() < numParents) {
+
+					double choice = rn.nextDouble();
+
+					int k=0;
+					while(choice > choice_weights[k] && k < numParents + numChildren - 1) {
+						k++;
+					}
+
+					curGeneration.add(nextCandidates[k]);
+
+					Double sigma = nextCandidates[k].getSigma();
+					sigma = BigDecimal.valueOf(sigma).setScale(3, RoundingMode.HALF_UP).doubleValue();
+					Double fitness = candidateFitness[k];
+
+					System.out.print(nextCandidates[k].id + ",");
+					System.out.print(sigma.toString() + ",");
+					System.out.print(fitness.intValue() + ";");
+					
+				}
+
 				System.out.println("");
 				System.out.println(curGeneration.size() + " selected");
 				
-				itr = networkFitnesses.descendingMap().entrySet().iterator();
-				String currentRow = "";
-				
-				while(itr.hasNext()){
-					Map.Entry<Double, ArrayList<NeuralNetwork>> entry = itr.next();
-					for(int j = 0; j < entry.getValue().size(); j++){
-						currentRow += entry.getKey() + ",";
-					}
-				}
 				
 				csvOut += currentRow + "\n";
 			}
