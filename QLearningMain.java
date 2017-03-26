@@ -20,8 +20,10 @@ public final class QLearningMain {
 		final BasicTask basicTask = new BasicTask(cmdLineOptions);
 		
 		// set up the Q table for use with the agent
-		QTable table = new QTable(4);	// action space of 4 possible actions
+		QTable table = new QTable(5);	// action space of 4 possible actions
 		QLearningAgent.setQTable(table);
+		
+		double maxFitness = 0.0;
 		
 		for (int i=0; i<numEpisodes; i++) {
 
@@ -31,9 +33,14 @@ public final class QLearningMain {
 			final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
 			double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
 			
-			// TODO use the reward function to update the q-table
+			if (maxFitness < fitness) {
+				maxFitness = fitness;
+				System.out.println("New max fitness: " + maxFitness);
+			}
+			
+			QLearningAgent.runFinalReward(basicTask.getEnvironment().getMarioStatus());
 		}
 		
+		System.out.println(maxFitness);
 	}
-
 }
