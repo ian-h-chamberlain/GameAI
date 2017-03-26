@@ -90,8 +90,12 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		
 		int marioX = marioCenter[0];
 		int marioY = marioCenter[1];
+
 		// state[2-4] detect small, medium, and large gaps in the level
-		
+		boolean[] gaps = detectGaps(marioX, marioY);
+		state[2] = gaps[0];
+		state[3] = gaps[1];
+		state[4] = gaps[2];
 		
 		// state[5-8] are for obstacles directly in front of mario
 		state[5] = (levelScene[marioX + 1][marioY - 1] != 0);
@@ -114,5 +118,32 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		// state[19-21] for platforms above Mario
 		
 		return state;
+	}
+	
+	boolean[] detectGaps(int marioX, int marioY) {
+		boolean[] result = new boolean[]{false, false, false};
+		
+		// check for small gaps close to mario
+		if (levelScene[marioX + 1][marioY - 2] == 0 ||
+				levelScene[marioX + 2][marioY - 2] == 0) {
+			result[0] = true;
+		}
+		
+		// medium gaps slightly further away
+		if (levelScene[marioX + 3][marioY - 2] == 0 ||
+				levelScene[marioX + 4][marioY - 2] == 0 ||
+				levelScene[marioX + 5][marioY - 2] == 0) {
+			result[1] = true;
+		}
+
+		// and large gaps several squares away
+		if (levelScene[marioX + 6][marioY - 2] == 0 ||
+				levelScene[marioX + 7][marioY - 2] == 0 ||
+				levelScene[marioX + 8][marioY - 2] == 0 ||
+				levelScene[marioX + 9][marioY - 2] == 0) {
+			result[2] = true;
+		}
+		
+		return result;
 	}
 }
