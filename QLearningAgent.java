@@ -3,6 +3,7 @@ package ch.idsia.agents.controllers;
 import java.util.Random;
 
 import ch.idsia.agents.Agent;
+import ch.idsia.benchmark.mario.engine.sprites.Mario;
 
 public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
@@ -18,6 +19,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	public boolean[] lastAction;
 	public boolean[] lastState;
+	public float lastPos = 0;
 	
 	public QLearningAgent() {
 		super("QLearningAgent");
@@ -25,7 +27,23 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	}
 	
 	public float getReward(){
-		//returns the reward for being in the current state as the agent. 
+		//returns the reward for being in the current state as the agent.
+		float ret = marioFloatPos[0] - lastPos;
+		lastPos = marioFloatPos[0];
+		return ret;
+	}
+	
+	public void runFinalReward(){
+		float reward = 0;
+		if(Mario.STATUS_DEAD == this.marioStatus){
+			reward -= 1000;
+		}
+		if(Mario.STATUS_WIN == this.marioStatus){
+			reward += 1000;
+		}
+		float oldQ = table.getQ(lastState, lastAction);
+		float newQ = oldQ + learningRate * (reward - oldQ); 
+		table.setQ(lastState, lastAction, newQ);
 	}
 	
 	@Override
