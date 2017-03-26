@@ -5,6 +5,8 @@ import java.util.Random;
 import ch.idsia.agents.Agent;
 
 public class QLearningAgent extends BasicMarioAIAgent implements Agent {
+	
+	static QTable table;
 
 	public float epsilon;
 	
@@ -20,6 +22,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	@Override
 	public boolean[] getAction() {
 		
+	}
+	public static void setQTable(QTable t) {
+		table = t;
 	}
 	
 	public void reset() {
