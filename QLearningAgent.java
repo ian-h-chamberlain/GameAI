@@ -17,13 +17,13 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	int stuckCounter = 0;
 	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 
-	public float epsilon;
-	public float learningRate;
+	public static float epsilon;
+	public static float learningRate;
 	
 	Random rand = new Random();
 	
-	public boolean[] lastAction;
-	public boolean[] lastState;
+	public static boolean[] lastAction;
+	public static boolean[] lastState;
 	public float lastPos = 0;
 	
 	public QLearningAgent() {
@@ -38,18 +38,19 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		return ret;
 	}
 	
-	public void runFinalReward(){
+	public static void runFinalReward(int status){
 		float reward = 0;
-		if(Mario.STATUS_DEAD == this.marioStatus){
+		if(Mario.STATUS_DEAD == status){
 			reward -= 1000;
 		}
-		if(Mario.STATUS_WIN == this.marioStatus){
+		if(Mario.STATUS_WIN == status){
 			reward += 1000;
 		}
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
 	}
+	 
 	
 	@Override
 	public boolean[] getAction() {
@@ -67,7 +68,12 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		}
 		lastState = state;
 		lastAction = ret;
-		return ret;
+		boolean[] actualRet = new boolean[6];
+		for(int i = 0; i < ret.length; i++){
+			actualRet[i] = ret[i];
+		}
+		ret[ret.length-1] = false;
+		return actualRet;
 	}
 	
 	
