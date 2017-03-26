@@ -19,6 +19,22 @@ public class QTable {
 		return table.get(state)[index];
 	}
 	
+	public boolean[] maxQAction(boolean[] state) {
+		initializeState(state);
+		float[] values = table.get(state);
+		
+		// find the max q-value
+		int maxIndex = 0;
+		for (int i=0; i<values.length; i++) {
+			if (values[i] > values[maxIndex]) {
+				maxIndex = i;
+			}
+		}
+		
+		// and return the action set that results in that value
+		return getActionFromIndex(maxIndex);
+	}
+	
 	public void setQ(boolean[] state, boolean[] action, float newValue) {
 		initializeState(state);
 		int index = getActionIndex(action);
@@ -54,4 +70,13 @@ public class QTable {
 		return result;
 	}
 	
+	// and a helper function for the reverse operation
+	boolean[] getActionFromIndex(int index) {
+		boolean[] result = new boolean[numActions];
+		for (int i=0; i<numActions; i++) {
+			result[i] = ((index >> i) % 2 == 1);
+		}
+		
+		return result;
+	}
 }
