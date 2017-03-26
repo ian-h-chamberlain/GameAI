@@ -65,7 +65,11 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 			oldQ = table.getQ(lastState, lastAction);	
 		}
 		float newQ = oldQ + learningRate * (getReward() + currentActionQ - oldQ); 
-		table.setQ(lastState, lastAction, newQ);
+
+		if (lastState != null && lastAction != null) {
+			table.setQ(lastState, lastAction, newQ);
+		}
+
 		if(rand.nextFloat()> epsilon){
 			ret = table.maxQAction(state);
 		}else{

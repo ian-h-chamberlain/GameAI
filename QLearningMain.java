@@ -35,12 +35,17 @@ public final class QLearningMain {
 			
 			if (maxFitness < fitness) {
 				maxFitness = fitness;
-				System.out.println("New max fitness: " + maxFitness);
 			}
+			System.out.println(fitness);
 			
 			QLearningAgent.runFinalReward(basicTask.getEnvironment().getMarioStatus());
 		}
 		
-		System.out.println(maxFitness);
+		// visualize the final result
+		cmdLineOptions.setVisualization(true);
+		basicTask.reset(cmdLineOptions);
+		basicTask.runOneEpisode();
+		
+		System.out.println("Max fitness was " + maxFitness);
 	}
 }

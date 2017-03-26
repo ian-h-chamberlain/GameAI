@@ -1,6 +1,8 @@
 package ch.idsia.agents.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class QTable {
 
@@ -24,15 +26,26 @@ public class QTable {
 		float[] values = table.get(state);
 		
 		// find the max q-value
+		ArrayList<Integer> possibleActions = new ArrayList<>();
+
 		int maxIndex = 0;
 		for (int i=0; i<values.length; i++) {
 			if (values[i] > values[maxIndex]) {
 				maxIndex = i;
+				possibleActions.clear();
+			}
+
+			if (values[i] == values[maxIndex]) {
+				possibleActions.add(i);
 			}
 		}
 		
+		Random rn = new Random(); 
+		
+		int index = possibleActions.get(rn.nextInt(possibleActions.size()));
+		
 		// and return the action set that results in that value
-		return getActionFromIndex(maxIndex);
+		return getActionFromIndex(index);
 	}
 	
 	public void setQ(boolean[] state, boolean[] action, float newValue) {
@@ -51,9 +64,16 @@ public class QTable {
 		if (table.containsKey(state)) {
 			return;
 		}
+		
+		boolean[] possibleActions = new boolean[numActions];
+		for (int i=0; i<numActions; i++) {
+			possibleActions[i] = true;
+		}
+		
+		int totalActions = getActionIndex(possibleActions);
 
 		// otherwise set all its action values
-		table.put(state, new float[numActions]);
+		table.put(state, new float[totalActions]);
 		for (int i=0; i<numActions; i++) {
 			table.get(state)[i] = initialValue;
 		}
