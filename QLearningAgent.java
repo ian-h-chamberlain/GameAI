@@ -4,6 +4,7 @@ import java.util.Random;
 
 import ch.idsia.agents.Agent;
 import ch.idsia.benchmark.mario.engine.sprites.Mario;
+import ch.idsia.benchmark.mario.environments.Environment;
 
 public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
@@ -27,6 +28,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public static boolean[] lastState;
 	public float lastPos = 0;
 	
+	int collisions = 0;
+	int prevCollisions = 0;
+	
 	public static float totalQ; 
 	
 	public QLearningAgent() {
@@ -38,19 +42,22 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		//returns the reward for being in the current state as the agent.
 		float ret = marioFloatPos[0] - lastPos;
 		lastPos = marioFloatPos[0];
+		
+		ret -= 50000 * (collisions - prevCollisions);
+		prevCollisions = collisions;
 		//System.out.println(ret);
 		return ret;
 	}
 	
 	public static void runFinalReward(int status){
 		float reward = 0;
-		// System.out.println("TotalQ: " + totalQ);
+		System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
 		if(Mario.STATUS_DEAD == status){
-			reward -= 1000;
+			reward -= 100000;
 		}
 		if(Mario.STATUS_WIN == status){
-			reward += 1000;
+			reward += 100000;
 		}
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
@@ -109,6 +116,13 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	public void reset() {
 		
+	}
+	
+	@Override
+	public void integrateObservation(Environment env) {
+		super.integrateObservation(env);
+		
+		collisions = env.getEvaluationInfo().collisionsWithCreatures;
 	}
 	
 	boolean[] getState() {
