@@ -13,10 +13,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	// variables for check if we're stuck
 	boolean isStuck = false;
-	float stuckThreshold = 0.1f;
+	float stuckThreshold = 0.01f;
 	int stayStuckFrames = 250;
 	int stuckCounter = 0;
-	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 
 	public static float epsilon = .5f;
 	public static float learningRate = .5f;
@@ -145,10 +144,10 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		stuckCounter++;
 		if (stuckCounter >= stayStuckFrames) {
 			// determine whether stuck or not
-			isStuck = (Math.abs(marioFloatPos[0] - previousFloatPos[0]) < stuckThreshold);
+			isStuck = (Math.abs(marioFloatPos[0] - lastPos) < stuckThreshold);
+
 			// reset counter
 			stuckCounter = 0;
-			previousFloatPos = marioFloatPos;
 		}
 
 		// state[0] is stuck?
