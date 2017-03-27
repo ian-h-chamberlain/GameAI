@@ -17,8 +17,8 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	int stuckCounter = 0;
 	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 
-	public static float epsilon;
-	public static float learningRate;
+	public static float epsilon = .5f;
+	public static float learningRate = .5f;
 	
 	Random rand = new Random();
 	
