@@ -17,7 +17,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	int stuckCounter = 0;
 	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 
-	public static float epsilon = .5f;
+	public static float epsilon = 0.6f;
 	public static float learningRate = .5f;
 	public static float discount = .6f;
 	
@@ -44,13 +44,13 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	public static void runFinalReward(int status){
 		float reward = 0;
-		// System.out.println("TotalQ: " + totalQ);
+		 System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
 		if(Mario.STATUS_DEAD == status){
-			reward -= 1000;
+			reward -= 1000000;
 		}
 		if(Mario.STATUS_WIN == status){
-			reward += 1000;
+			reward += 1000000;
 		}
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
@@ -65,6 +65,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		//update the q value for the last action.
 		float currentActionQ = table.getQ(state, table.maxQAction(state));
 		totalQ += currentActionQ;
+		System.out.print(currentActionQ + ",");
 		float oldQ;
 		if(lastState == null || lastAction == null){
 			oldQ = 0;
