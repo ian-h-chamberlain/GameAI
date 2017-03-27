@@ -10,7 +10,7 @@ public final class QLearningMain {
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.QLearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 
-		int numEpisodes = 2000;
+		int numEpisodes = 1000;
 		int difficulty = 0;
 		int seed = 0;
 		// initialize the level paramaters
