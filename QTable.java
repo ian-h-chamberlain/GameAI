@@ -36,17 +36,8 @@ public class QTable {
 		for (int i=0; i<values.length; i++) {
 			if (values[i] > values[maxIndex]) {
 				maxIndex = i;
-				possibleActions.clear();
-			}
-
-			if (values[i] == values[maxIndex]) {
-				possibleActions.add(i);
 			}
 		}
-		
-		Random rn = new Random(); 
-		
-		int index = possibleActions.get(rn.nextInt(possibleActions.size()));
 		
 		// and return the action set that results in that value
 		return boolArrayFromLong(maxIndex);

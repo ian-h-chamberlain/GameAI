@@ -10,9 +10,9 @@ public final class QLearningMain {
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.QLearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 
-		int numEpisodes = 1000;
+		int numEpisodes = 2000;
 		int difficulty = 0;
-		int seed = 0;
+		int seed = 1;
 		// initialize the level paramaters
 		cmdLineOptions.setLevelDifficulty(difficulty);
 		cmdLineOptions.setLevelRandSeed(seed);
@@ -52,5 +52,9 @@ public final class QLearningMain {
 		basicTask.runOneEpisode();
 		
 		System.out.println("Max fitness was " + maxFitness);
+		final MarioCustomSystemOfValues sov = new MarioCustomSystemOfValues();
+		System.out.println("Final was " + basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov));
+		
+		System.exit(0);
 	}
 }

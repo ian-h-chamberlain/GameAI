@@ -9,7 +9,7 @@ import ch.idsia.benchmark.mario.environments.Environment;
 public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	static QTable table;
-	int stateSize = 18;
+	int stateSize = 23;
 	
 	// variables for check if we're stuck
 	boolean isStuck = false;
@@ -28,8 +28,11 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public static boolean[] lastState;
 	public float lastPos = 0;
 	
-	int collisions = 0;
-	int prevCollisions = 0;
+	int kills = 0;
+	int prevKills = 0;
+	
+	int marioMode = -1;
+	int prevMarioMode = -1;
 	
 	public static float totalQ; 
 	
@@ -43,8 +46,17 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float ret = marioFloatPos[0] - lastPos;
 		lastPos = marioFloatPos[0];
 		
-		ret -= 50000 * (collisions - prevCollisions);
-		prevCollisions = collisions;
+		ret += 100 * (kills - prevKills);
+		prevKills = kills;
+		
+		if (marioMode < prevMarioMode && prevMarioMode >= 0) {
+			ret -= 10000;
+		}
+		else if (marioMode > prevMarioMode && prevMarioMode >= 0) {
+			ret += 10000;
+		}
+		prevMarioMode = marioMode;
+		
 		//System.out.println(ret);
 		return ret;
 	}
@@ -54,10 +66,10 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
 		if(Mario.STATUS_DEAD == status){
-			reward -= 100000;
+			reward -= 10000;
 		}
 		if(Mario.STATUS_WIN == status){
-			reward += 100000;
+			reward += 10000;
 		}
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
@@ -122,7 +134,8 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public void integrateObservation(Environment env) {
 		super.integrateObservation(env);
 		
-		collisions = env.getEvaluationInfo().collisionsWithCreatures;
+		kills = env.getEvaluationInfo().killsTotal;
+		marioMode = env.getMarioMode();
 	}
 	
 	boolean[] getState() {
@@ -170,8 +183,23 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		state[16] = (enemies[marioX + 1][marioY] != 0);
 		state[17] = (enemies[marioX + 1][marioY + 1] != 0);
 		
+		if (lastAction != null) {
+			state[18] = lastAction[0];
+			state[19] = lastAction[1];
+			state[20] = lastAction[2];
+			state[21] = lastAction[3];
+			state[22] = lastAction[4];
+		}
+		else {
+			state[18] = false;
+			state[19] = false;
+			state[20] = false;
+			state[21] = false;
+			state[22] = false;
+		}
+		
 		// POSSIBLE IDEAS
-		// state[19-21] for platforms above Mario
+		// state for platforms above Mario
 		
 		return state;
 	}
