@@ -49,7 +49,7 @@ public class QTable {
 		int index = possibleActions.get(rn.nextInt(possibleActions.size()));
 		
 		// and return the action set that results in that value
-		return boolArrayFromLong(index);
+		return boolArrayFromLong(maxIndex);
 	}
 	
 	public void setQ(boolean[] state, boolean[] action, float newValue) {
@@ -78,6 +78,10 @@ public class QTable {
 		for (int i=0; i<numActions; i++) {
 			table.get(stateID)[i] = initialValue;
 		}
+	}
+	
+	public int size() {
+		return table.size();
 	}
 	
 	// Helper function to form an int out of an action boolean array

@@ -44,7 +44,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	public static void runFinalReward(int status){
 		float reward = 0;
-		System.out.println("TotalQ: " + totalQ);
+		// System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
 		if(Mario.STATUS_DEAD == status){
 			reward -= 1000;
