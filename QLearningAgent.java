@@ -9,7 +9,7 @@ import ch.idsia.benchmark.mario.environments.Environment;
 public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	static QTable table;
-	int stateSize = 23;
+	int stateSize = 18;
 	
 	// variables for check if we're stuck
 	boolean isStuck = false;
@@ -140,9 +140,6 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	boolean[] getState() {
 		boolean[] state = new boolean[stateSize];
-		
-		// state[0] is stuck?
-		state[0] = isStuck;
 
 		// reset position every so often
 		stuckCounter++;
@@ -153,6 +150,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 			stuckCounter = 0;
 			previousFloatPos = marioFloatPos;
 		}
+
+		// state[0] is stuck?
+		state[0] = isStuck;
 		
 		// state[1] is on the ground
 		state[1] = isMarioOnGround;
@@ -182,21 +182,6 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		state[15] = (enemies[marioX + 1][marioY - 1] != 0);
 		state[16] = (enemies[marioX + 1][marioY] != 0);
 		state[17] = (enemies[marioX + 1][marioY + 1] != 0);
-		
-		if (lastAction != null) {
-			state[18] = lastAction[0];
-			state[19] = lastAction[1];
-			state[20] = lastAction[2];
-			state[21] = lastAction[3];
-			state[22] = lastAction[4];
-		}
-		else {
-			state[18] = false;
-			state[19] = false;
-			state[20] = false;
-			state[21] = false;
-			state[22] = false;
-		}
 		
 		// POSSIBLE IDEAS
 		// state for platforms above Mario
