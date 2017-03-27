@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class QTable {
 
-	HashMap<boolean[], float[]> table;
+	HashMap<Long, float[]> table;
 	float initialValue = 0.0f;
 	int numActions;
 	
@@ -17,13 +17,17 @@ public class QTable {
 	
 	public float getQ(boolean[] state, boolean[] action) {
 		initializeState(state);
-		int index = getActionIndex(action);
-		return table.get(state)[index];
+		int index = (int) longFromBoolArray(action);
+		
+		long stateID = longFromBoolArray(state);
+		return table.get(stateID)[index];
 	}
 	
 	public boolean[] maxQAction(boolean[] state) {
 		initializeState(state);
-		float[] values = table.get(state);
+		
+		long stateID = longFromBoolArray(state);
+		float[] values = table.get(stateID);
 		
 		// find the max q-value
 		ArrayList<Integer> possibleActions = new ArrayList<>();
@@ -45,18 +49,14 @@ public class QTable {
 		int index = possibleActions.get(rn.nextInt(possibleActions.size()));
 		
 		// and return the action set that results in that value
-		return getActionFromIndex(index);
+		return boolArrayFromLong(index);
 	}
 	
 	public void setQ(boolean[] state, boolean[] action, float newValue) {
 		initializeState(state);
-		int index = getActionIndex(action);
-		table.get(state)[index] = newValue;
-	}
-	
-	public float getReward(boolean[] state) {
-		// TODO evaluate state for reward
-		return 0.0f;
+		int index = (int) longFromBoolArray(action);
+		long stateID = longFromBoolArray(state);
+		table.get(stateID)[index] = newValue;
 	}
 	
 	void initializeState(boolean[] state) {
@@ -70,18 +70,19 @@ public class QTable {
 			possibleActions[i] = true;
 		}
 		
-		int totalActions = getActionIndex(possibleActions);
+		int totalActions = (int) longFromBoolArray(possibleActions);
+		long stateID = longFromBoolArray(state);
 
 		// otherwise set all its action values
-		table.put(state, new float[totalActions]);
+		table.put(stateID, new float[totalActions]);
 		for (int i=0; i<numActions; i++) {
-			table.get(state)[i] = initialValue;
+			table.get(stateID)[i] = initialValue;
 		}
 	}
 	
 	// Helper function to form an int out of an action boolean array
-	int getActionIndex(boolean[] action) {
-		int result = 0;
+	long longFromBoolArray(boolean[] action) {
+		long result = 0;
 		for (int i=0; i < action.length; i++) {
 			if (action[i]) {
 				result |= 1 << i;
@@ -91,7 +92,7 @@ public class QTable {
 	}
 	
 	// and a helper function for the reverse operation
-	boolean[] getActionFromIndex(int index) {
+	boolean[] boolArrayFromLong(long index) {
 		boolean[] result = new boolean[numActions];
 		for (int i=0; i<numActions; i++) {
 			result[i] = ((index >> i) % 2 == 1);
