@@ -41,6 +41,11 @@ public final class QLearningMain {
 			QLearningAgent.runFinalReward(basicTask.getEnvironment().getMarioStatus());
 		}
 		
+		// disable random choices
+		QLearningAgent.epsilon = 0.0f;
+		
+		System.out.println("QTable has " + table.size() + " entries");
+		
 		// visualize the final result
 		cmdLineOptions.setVisualization(true);
 		basicTask.reset(cmdLineOptions);
