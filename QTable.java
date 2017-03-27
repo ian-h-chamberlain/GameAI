@@ -61,7 +61,8 @@ public class QTable {
 	
 	void initializeState(boolean[] state) {
 		// if we've seen the state before, do nothing
-		if (table.containsKey(state)) {
+		long stateID = longFromBoolArray(state);
+		if (table.containsKey(stateID)) {
 			return;
 		}
 		
@@ -71,7 +72,6 @@ public class QTable {
 		}
 		
 		int totalActions = (int) longFromBoolArray(possibleActions);
-		long stateID = longFromBoolArray(state);
 
 		// otherwise set all its action values
 		table.put(stateID, new float[totalActions]);
