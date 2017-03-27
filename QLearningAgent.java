@@ -19,6 +19,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 
 	public static float epsilon = .5f;
 	public static float learningRate = .5f;
+	public static float discount = .6f;
 	
 	Random rand = new Random();
 	
@@ -70,8 +71,8 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		}else{
 			oldQ = table.getQ(lastState, lastAction);	
 		}
-		float newQ = oldQ + learningRate * (getReward() + currentActionQ - oldQ); 
-		System.out.println(newQ);
+		float newQ = oldQ + learningRate * (getReward() + discount*currentActionQ - oldQ); 
+		//System.out.println(newQ);
 		if (lastState != null && lastAction != null) {
 			table.setQ(lastState, lastAction, newQ);
 		}else{
