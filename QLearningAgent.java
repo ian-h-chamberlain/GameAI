@@ -12,13 +12,14 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	int stateSize = 18;
 	
 	// variables for check if we're stuck
-	boolean isStuck = false;
-	float stuckThreshold = 0.1f;
+	static boolean isStuck = false;
+	float stuckThreshold = 0.01f;
 	int stayStuckFrames = 250;
 	int stuckCounter = 0;
 	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 	public static boolean sarsa = false;
-	public static float epsilon = .5f;
+
+	public static float epsilon = 0f;
 	public static float learningRate = .5f;
 	public static float discount = .6f;
 	
@@ -28,8 +29,11 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public static boolean[] lastState;
 	public float lastPos = 0;
 	
-	int collisions = 0;
-	int prevCollisions = 0;
+	int kills = 0;
+	int prevKills = 0;
+	
+	int marioMode = -1;
+	int prevMarioMode = -1;
 	
 	public static float totalQ; 
 	
@@ -46,8 +50,15 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		}
 		lastPos = marioFloatPos[0];
 		
-		ret -= 50000 * (collisions - prevCollisions);
-		prevCollisions = collisions;
+		ret += 100 * (kills - prevKills);
+		prevKills = kills;
+		
+		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
+			ret += 10000 * (marioMode - prevMarioMode);
+		}
+
+		prevMarioMode = marioMode;
+		
 		//System.out.println(ret);
 		return ret;
 	}
@@ -57,14 +68,21 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
 		if(Mario.STATUS_DEAD == status){
-			reward -= 100000;
+			reward -= 10000;
 		}
 		if(Mario.STATUS_WIN == status){
-			reward += 100000;
+			reward += 10000;
+		}
+		if(isStuck){
+			System.out.println("IS STUCK LOSE 20000");
+			reward -= 20000;
 		}
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
+		
+		System.out.println("Old q: " + oldQ);
+		System.out.println("Final q: " + newQ);
 	}
 	 
 	
@@ -135,24 +153,25 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public void integrateObservation(Environment env) {
 		super.integrateObservation(env);
 		
-		collisions = env.getEvaluationInfo().collisionsWithCreatures;
+		kills = env.getEvaluationInfo().killsTotal;
+		marioMode = env.getMarioMode();
 	}
 	
 	boolean[] getState() {
 		boolean[] state = new boolean[stateSize];
-		
-		// state[0] is stuck?
-		state[0] = isStuck;
 
 		// reset position every so often
 		stuckCounter++;
 		if (stuckCounter >= stayStuckFrames) {
 			// determine whether stuck or not
-			isStuck = (Math.abs(marioFloatPos[0] - previousFloatPos[0]) < stuckThreshold);
+			isStuck = (Math.abs(marioFloatPos[0] - lastPos) < stuckThreshold);
+
 			// reset counter
 			stuckCounter = 0;
-			previousFloatPos = marioFloatPos;
 		}
+
+		// state[0] is stuck?
+		state[0] = isStuck;
 		
 		// state[1] is on the ground
 		state[1] = isMarioOnGround;
@@ -184,7 +203,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		state[17] = (enemies[marioX + 1][marioY + 1] != 0);
 		
 		// POSSIBLE IDEAS
-		// state[19-21] for platforms above Mario
+		// state for platforms above Mario
 		
 		return state;
 	}
