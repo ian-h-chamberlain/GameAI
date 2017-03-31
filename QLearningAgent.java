@@ -48,12 +48,10 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		ret += 100 * (kills - prevKills);
 		prevKills = kills;
 		
-		if (marioMode < prevMarioMode && prevMarioMode >= 0) {
-			ret -= 10000;
+		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
+			ret += 10000 * (marioMode - prevMarioMode);
 		}
-		else if (marioMode > prevMarioMode && prevMarioMode >= 0) {
-			ret += 10000;
-		}
+
 		prevMarioMode = marioMode;
 		
 		//System.out.println(ret);
@@ -73,6 +71,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
+		
+		System.out.println("Old q: " + oldQ);
+		System.out.println("Final q: " + newQ);
 	}
 	 
 	
