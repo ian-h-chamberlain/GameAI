@@ -12,7 +12,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	int stateSize = 18;
 	
 	// variables for check if we're stuck
-	boolean isStuck = false;
+	static boolean isStuck = false;
 	float stuckThreshold = 0.01f;
 	int stayStuckFrames = 250;
 	int stuckCounter = 0;
