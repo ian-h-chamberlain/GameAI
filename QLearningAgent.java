@@ -53,7 +53,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		*/
 		
 		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
-			ret += 10000 * (marioMode - prevMarioMode);
+			ret -= 5000 * (prevMarioMode - marioMode);
 		}
 
 		prevMarioMode = marioMode;
@@ -72,8 +72,14 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		if(Mario.STATUS_WIN == status){
 			reward += 10000;
 		}
+		
+		if (isStuck) {
+			reward -= 10000;
+		}
+		
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
+		
 		table.setQ(lastState, lastAction, newQ);
 	}
 	 
@@ -110,7 +116,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		for(int i = 0; i < ret.length; i++){
 			actualRet[i] = ret[i];
 		}
-		ret[ret.length-1] = false;
+		actualRet[actualRet.length-1] = false;
 		return actualRet;
 	}
 	
@@ -134,6 +140,8 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		stuckCounter = 0;
 		marioMode = prevMarioMode = -1;
 		isStuck = false;
+		lastAction = null;
+		lastState = -1;
 	}
 	
 	@Override
@@ -146,11 +154,6 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	long getState() {
 		
-		return frameCount++;
-		
-		/*
-		boolean[] state = new boolean[stateSize];
-
 		// reset position every so often
 		stuckCounter++;
 		if (stuckCounter >= stayStuckFrames) {
@@ -160,6 +163,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 			// reset counter
 			stuckCounter = 0;
 		}
+		return frameCount++;
+		/*
+		boolean[] state = new boolean[stateSize];
 
 		// state[0] is stuck?
 		state[0] = isStuck;
