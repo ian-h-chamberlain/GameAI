@@ -8,26 +8,26 @@ public class QTable {
 
 	HashMap<Long, float[]> table;
 	float initialValue = 0.0f;
-	int numActions;
+	static int numActions;
 	
 	public QTable(int actions) {
 		table = new HashMap<>();
 		numActions = actions;
 	}
 	
-	public float getQ(boolean[] state, boolean[] action) {
-		initializeState(state);
+	public float getQ(long state, boolean[] action) {
 		int index = (int) longFromBoolArray(action);
 		
-		long stateID = longFromBoolArray(state);
-		return table.get(stateID)[index];
+		// long stateID = longFromBoolArray(state);
+		initializeState(state);
+		return table.get(state)[index];
 	}
 	
-	public boolean[] maxQAction(boolean[] state) {
+	public boolean[] maxQAction(long state) {
 		initializeState(state);
 		
-		long stateID = longFromBoolArray(state);
-		float[] values = table.get(stateID);
+		// long stateID = longFromBoolArray(state);
+		float[] values = table.get(state);
 		
 		// find the max q-value
 		ArrayList<Integer> possibleActions = new ArrayList<>();
@@ -43,17 +43,16 @@ public class QTable {
 		return boolArrayFromLong(maxIndex);
 	}
 	
-	public void setQ(boolean[] state, boolean[] action, float newValue) {
+	public void setQ(long state, boolean[] action, float newValue) {
+		// long stateID = longFromBoolArray(state);
 		initializeState(state);
 		int index = (int) longFromBoolArray(action);
-		long stateID = longFromBoolArray(state);
-		table.get(stateID)[index] = newValue;
+		table.get(state)[index] = newValue;
 	}
 	
-	void initializeState(boolean[] state) {
+	void initializeState(long state) {
 		// if we've seen the state before, do nothing
-		long stateID = longFromBoolArray(state);
-		if (table.containsKey(stateID)) {
+		if (table.containsKey(state)) {
 			return;
 		}
 		
@@ -65,9 +64,9 @@ public class QTable {
 		int totalActions = (int) longFromBoolArray(possibleActions);
 
 		// otherwise set all its action values
-		table.put(stateID, new float[totalActions]);
-		for (int i=0; i<numActions; i++) {
-			table.get(stateID)[i] = initialValue;
+		table.put(state, new float[totalActions]);
+		for (int i=0; i<totalActions; i++) {
+			table.get(state)[i] = initialValue;
 		}
 	}
 	
@@ -76,7 +75,7 @@ public class QTable {
 	}
 	
 	// Helper function to form an int out of an action boolean array
-	long longFromBoolArray(boolean[] action) {
+	static long longFromBoolArray(boolean[] action) {
 		long result = 0;
 		for (int i=0; i < action.length; i++) {
 			if (action[i]) {
@@ -87,7 +86,7 @@ public class QTable {
 	}
 	
 	// and a helper function for the reverse operation
-	boolean[] boolArrayFromLong(long index) {
+	public static boolean[] boolArrayFromLong(long index) {
 		boolean[] result = new boolean[numActions];
 		for (int i=0; i<numActions; i++) {
 			result[i] = ((index >> i) % 2 == 1);

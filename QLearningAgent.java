@@ -21,10 +21,12 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public static float learningRate = .5f;
 	public static float discount = .6f;
 	
+	long frameCount = 0;
+	
 	Random rand = new Random();
 	
 	public static boolean[] lastAction;
-	public static boolean[] lastState;
+	public static long lastState = -1;
 	public float lastPos = 0;
 	
 	int kills = 0;
@@ -45,8 +47,10 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float ret = marioFloatPos[0] - lastPos;
 		lastPos = marioFloatPos[0];
 		
+		/*
 		ret += 100 * (kills - prevKills);
 		prevKills = kills;
+		*/
 		
 		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
 			ret += 10000 * (marioMode - prevMarioMode);
@@ -71,28 +75,25 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
-		
-		System.out.println("Old q: " + oldQ);
-		System.out.println("Final q: " + newQ);
 	}
 	 
 	
 	@Override
 	public boolean[] getAction() {
 		boolean[] ret;
-		boolean[] state = getState();
+		long state = getState();
 		//update the q value for the last action.
 		float currentActionQ = table.getQ(state, table.maxQAction(state));
 		totalQ += currentActionQ;
 		float oldQ;
-		if(lastState == null || lastAction == null){
+		if(lastState < 0 || lastAction == null){
 			oldQ = 0;
 		}else{
 			oldQ = table.getQ(lastState, lastAction);	
 		}
 		float newQ = oldQ + learningRate * (getReward() + discount*currentActionQ - oldQ); 
 		//System.out.println(newQ);
-		if (lastState != null && lastAction != null) {
+		if (lastState >= 0 && lastAction != null) {
 			table.setQ(lastState, lastAction, newQ);
 		}else{
 			System.out.println("Hit a null");
@@ -127,7 +128,12 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	}
 	
 	public void reset() {
-		
+		frameCount = 0;
+		prevKills = kills = 0;
+		lastPos = 0;
+		stuckCounter = 0;
+		marioMode = prevMarioMode = -1;
+		isStuck = false;
 	}
 	
 	@Override
@@ -138,7 +144,11 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		marioMode = env.getMarioMode();
 	}
 	
-	boolean[] getState() {
+	long getState() {
+		
+		return frameCount++;
+		
+		/*
 		boolean[] state = new boolean[stateSize];
 
 		// reset position every so often
@@ -187,6 +197,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		// state for platforms above Mario
 		
 		return state;
+		*/
 	}
 	
 	boolean[] detectGaps(int marioX, int marioY) {
