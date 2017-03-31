@@ -28,7 +28,7 @@ public final class QLearningMain {
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.QLearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 
-		int numEpisodes = 10000;
+		int numEpisodes = 100;
 		int difficulty = 0;
 		int seed = 0;
 		// initialize the level paramaters
@@ -45,6 +45,7 @@ public final class QLearningMain {
 		String csvstr = "";
 		for (int i=0; i<numEpisodes; i++) {
 
+			//cmdLineOptions.setVisualization(true);
 			basicTask.reset(cmdLineOptions);
 			basicTask.runOneEpisode();
 			
@@ -68,7 +69,7 @@ public final class QLearningMain {
 		System.out.println("QTable has " + table.size() + " entries");
 		
 		// visualize the final result
-		cmdLineOptions.setVisualization(true);
+		cmdLineOptions.setVisualization(false);
 		basicTask.reset(cmdLineOptions);
 		basicTask.runOneEpisode();
 		
