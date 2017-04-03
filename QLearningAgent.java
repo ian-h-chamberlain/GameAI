@@ -20,7 +20,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	public static boolean sarsa = false;
 
 	public static float epsilon = .5f;
-	public static float learningRate = .8f;
+	public static float learningRate = .3f;
 	public static float discount = .9f;
 	
 	Random rand = new Random();
@@ -48,16 +48,18 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		if(ret < 0){
 			ret = 0;
 		}
+		ret *= 100;
 		lastPos = marioFloatPos[0];
 		
-		ret += 100 * (kills - prevKills);
+		/*
+		ret += 10 * (kills - prevKills);
 		prevKills = kills;
+		*/
 		
 		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
 			ret += 3000 * (marioMode - prevMarioMode);
+			prevMarioMode = marioMode;
 		}
-
-		prevMarioMode = marioMode;
 		
 		//System.out.println(ret);
 		return ret;
@@ -67,16 +69,20 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float reward = 0;
 		System.out.println("TotalQ: " + totalQ);
 		totalQ = 0;
-		if(Mario.STATUS_DEAD == status){
-			reward -= 10000;
-		}
+
 		if(Mario.STATUS_WIN == status){
 			reward += 10000;
 		}
+		else if (Mario.STATUS_DEAD == status){
+			reward -= 10000;
+		}
+
+		/*
 		if(isStuck){
 			System.out.println("IS STUCK LOSE 20000");
 			reward -= 20000;
 		}
+		*/
 		float oldQ = table.getQ(lastState, lastAction);
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
