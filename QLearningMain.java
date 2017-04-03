@@ -28,7 +28,7 @@ public final class QLearningMain {
 		final String argsString = "-vis off -ag ch.idsia.agents.controllers.QLearningAgent";
 		CmdLineOptions cmdLineOptions = new CmdLineOptions(argsString);
 
-		int numEpisodes = 5000;
+		int numEpisodes = 1000;
 		int difficulty = 0;
 		int seed = 1;
 		// initialize the level paramaters
@@ -56,8 +56,12 @@ public final class QLearningMain {
 				maxFitness = fitness;
 			}
 			System.out.println(fitness);
+			
+			int frames = basicTask.getEnvironment().getEvaluationInfo().timeSpent;
+			float avgQ = QLearningAgent.totalQ / frames;
+			
 			// System.out.println("Total Q: " + QLearningAgent.totalQ);
-			csvstr += i + "," + fitness + "," + QLearningAgent.totalQ + "\n";
+			csvstr += i + "," + fitness + "," + avgQ + "\n";
 			
 			QLearningAgent.runFinalReward(basicTask.getEnvironment().getMarioStatus());
 		}
@@ -71,6 +75,7 @@ public final class QLearningMain {
 		
 		// visualize the final result
 		cmdLineOptions.setVisualization(true);
+		cmdLineOptions.setFPS(72);
 		basicTask.reset(cmdLineOptions);
 		basicTask.runOneEpisode();
 		
@@ -79,7 +84,9 @@ public final class QLearningMain {
 		double fitness = basicTask.getEnvironment().getEvaluationInfo().computeWeightedFitness(sov);
 		System.out.println("Final was " + fitness);
 		
-		csvstr += numEpisodes + "," + fitness + "," + QLearningAgent.totalQ + "\n";
+		float avgQ = QLearningAgent.totalQ / basicTask.getEnvironment().getEvaluationInfo().timeSpent;
+		
+		csvstr += numEpisodes + "," + fitness + "," + avgQ + "\n";
 		
 		WriteCSV(filename, csvstr);
 		

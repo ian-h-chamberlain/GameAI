@@ -48,7 +48,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		if(ret < 0){
 			ret = 0;
 		}
-		ret *= 100;
+		// ret *= 100;
 		lastPos = marioFloatPos[0];
 		
 		/*
