@@ -19,9 +19,9 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	float[] previousFloatPos = new float[]{0.0f, 0.0f};
 	public static boolean sarsa = false;
 
-	public static float epsilon = 0f;
-	public static float learningRate = .5f;
-	public static float discount = .6f;
+	public static float epsilon = .5f;
+	public static float learningRate = .8f;
+	public static float discount = .9f;
 	
 	Random rand = new Random();
 	
@@ -81,8 +81,8 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		float newQ = oldQ + learningRate * (reward - oldQ); 
 		table.setQ(lastState, lastAction, newQ);
 		
-		System.out.println("Old q: " + oldQ);
-		System.out.println("Final q: " + newQ);
+		//System.out.println("Old q: " + oldQ);
+		//System.out.println("Final q: " + newQ);
 	}
 	 
 	
@@ -108,7 +108,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 			currentActionQ = table.getQ(state, table.maxQAction(state));
 		}
 		totalQ += currentActionQ;
-		System.out.print(currentActionQ + ",");
+		//System.out.print(currentActionQ + ",");
 		float oldQ;
 		if(lastState == null || lastAction == null){
 			oldQ = 0;
@@ -116,7 +116,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 			oldQ = table.getQ(lastState, lastAction);	
 		}
 		float newQ = oldQ + learningRate * (getReward() + discount*currentActionQ - oldQ); 
-		System.out.println(newQ);
+		//System.out.println(newQ);
 		if (lastState != null && lastAction != null) {
 			table.setQ(lastState, lastAction, newQ);
 		}
@@ -128,7 +128,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		for(int i = 0; i < ret.length; i++){
 			actualRet[i] = ret[i];
 		}
-		ret[ret.length-1] = false;
+		actualRet[actualRet.length-1] = false;
 		return actualRet;
 	}
 	
