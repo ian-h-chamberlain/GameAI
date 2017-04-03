@@ -57,12 +57,7 @@ public class QTable {
 			return;
 		}
 		
-		boolean[] possibleActions = new boolean[numActions];
-		for (int i=0; i<numActions; i++) {
-			possibleActions[i] = true;
-		}
-		
-		int totalActions = (int) longFromBoolArray(possibleActions);
+		int totalActions = (int) Math.pow(2, numActions);
 
 		// otherwise set all its action values
 		table.put(stateID, new float[totalActions]);

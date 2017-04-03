@@ -54,7 +54,7 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 		prevKills = kills;
 		
 		if (marioMode != prevMarioMode && prevMarioMode >= 0) {
-			ret += 10000 * (marioMode - prevMarioMode);
+			ret += 3000 * (marioMode - prevMarioMode);
 		}
 
 		prevMarioMode = marioMode;
@@ -147,6 +147,11 @@ public class QLearningAgent extends BasicMarioAIAgent implements Agent {
 	
 	public void reset() {
 		lastPos = 0;
+		stuckCounter = 0;
+		prevKills = kills = 0;
+		marioMode = prevMarioMode = -1;
+		isStuck = false;
+		lastAction = lastState = null;
 	}
 	
 	@Override
